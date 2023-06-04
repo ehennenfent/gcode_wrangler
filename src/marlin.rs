@@ -1,84 +1,50 @@
 use crate::{
-    GCode, LinearDraw, LinearMove, MachineType, Pause, Position, SetCurrentPosition,
-    SetPositionMode, Home, SetUnits, Vec3, Activate, Deactivate, StepperControl, EmergencyStop, EndProgram,
+    Activate, Deactivate, EndProgram, GCode, Home, LinearMove,
+    MachineType, StepperControl,
+    Vec3,
 };
 
 struct Marlin;
 impl MachineType for Marlin {}
 
-impl GCode<Marlin> for LinearDraw {
-    fn render(&self) -> String {
-        let mut parts: Vec<String> = Vec::new();
-        parts.push("G1".to_string());
-        if let Some(feedrate) = self.feedrate {
-            parts.push(format!("F{}", feedrate))
-        }
-        parts.push(self.target.to_string().unwrap());
-        parts.join(" ")
-    }
-}
-
-impl GCode<Marlin> for LinearMove {
-    fn render(&self) -> String {
-        let mut parts: Vec<String> = Vec::new();
-        parts.push("G0".to_string());
-        if let Some(feedrate) = self.feedrate {
-            parts.push(format!("F{}", feedrate))
-        }
-        parts.push(self.target.to_string().unwrap());
-        parts.join(" ")
-    }
-}
-
-impl GCode<Marlin> for Pause {
-    fn render(&self) -> String {
-        format!("G4 P{}", self.ms)
-    }
-}
-
-impl GCode<Marlin> for SetCurrentPosition {
-    fn render(&self) -> String {
-        format!("G92 {}", self.current.to_string().unwrap())
-    }
-}
-
-impl GCode<Marlin> for SetPositionMode {
-    fn render(&self) -> String {
-        match self.positioning {
-            Position::Absolute => "G90",
-            Position::Relative => "G91",
-        }
-        .to_string()
-    }
-}
-
 impl GCode<Marlin> for Activate {
     fn render(&self) -> String {
-        <LinearMove as GCode<Marlin>>::render(&LinearMove{target: Vec3{x: Some(0.0), y: Some(0.0), z: Some(-5.0)}, feedrate: None})
+        <LinearMove as GCode<Marlin>>::render(&LinearMove {
+            target: Vec3 {
+                x: Some(0.0),
+                y: Some(0.0),
+                z: Some(-5.0),
+            },
+            feedrate: None,
+        })
     }
 }
 
 impl GCode<Marlin> for Deactivate {
     fn render(&self) -> String {
-        <LinearMove as GCode<Marlin>>::render(&LinearMove{target: Vec3{x: Some(0.0), y: Some(0.0), z: Some(5.0)}, feedrate: None})
-    }
-}
-
-impl GCode<Marlin> for SetUnits {
-    fn render(&self) -> String {
-        match self.units {
-            crate::Units::Inches => "G20",
-            crate::Units::Millimeters => "G21",
-        }.to_string()
+        <LinearMove as GCode<Marlin>>::render(&LinearMove {
+            target: Vec3 {
+                x: Some(0.0),
+                y: Some(0.0),
+                z: Some(5.0),
+            },
+            feedrate: None,
+        })
     }
 }
 
 impl GCode<Marlin> for Home {
     fn render(&self) -> String {
         let mut parts: Vec<&str> = vec!["G28"];
-        if self.x {parts.push("X")};
-        if self.y {parts.push("Y")};
-        if self.z {parts.push("Z")};
+        if self.x {
+            parts.push("X")
+        };
+        if self.y {
+            parts.push("Y")
+        };
+        if self.z {
+            parts.push("Z")
+        };
 
         parts.join(" ")
     }
@@ -112,12 +78,6 @@ impl GCode<Marlin> for StepperControl {
         }
 
         lines.join("\n")
-    }
-}
-
-impl GCode<Marlin> for EmergencyStop {
-    fn render(&self) -> String {
-        "M112".to_string()
     }
 }
 

@@ -20,7 +20,7 @@ enum Units {
 
 enum StepperState {
     Enabled,
-    Disabled
+    Disabled,
 }
 
 struct SimulationState {
@@ -87,7 +87,7 @@ struct Activate {}
 struct Deactivate {}
 
 struct SetUnits {
-    units: Units
+    units: Units,
 }
 
 struct Home {
@@ -101,9 +101,6 @@ struct StepperControl {
     y: StepperState,
     z: StepperState,
 }
-
-struct EmergencyStop {}
-
 struct EndProgram {}
 
 struct SetXY {}
