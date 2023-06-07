@@ -6,3 +6,9 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+pyo3 = { git = "https://github.com/pyo3/pyo3", features = ["extension-module"] }
+
+
+[lib]
+name = "gcode_wrangler"
+crate-type = ["cdylib"]

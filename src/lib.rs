@@ -1,3 +1,5 @@
+use pyo3::prelude::*;
+
 pub mod generic;
 pub mod grbl;
 pub mod marlin;
@@ -104,3 +106,8 @@ struct StepperControl {
 struct EndProgram {}
 
 struct SetXY {}
+
+#[pymodule]
+fn gcode_wrangler(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
+    Ok(())
+}

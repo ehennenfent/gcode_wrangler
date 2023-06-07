@@ -16,3 +16,9 @@ Cargo.lock
 # IDE configuration files
 .vscode/
 .idea/
+
+# Pyo3
+.env/
+python/drawbot_control/__pycache__/
+python/drawbot_control/*.so
+
