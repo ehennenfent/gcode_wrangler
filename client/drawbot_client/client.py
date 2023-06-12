@@ -1,6 +1,6 @@
 import typing as t
 
-from drawbot_client import Drawbot
+from .turtle_wrapper import Drawbot
 
 
 class SessionManager:

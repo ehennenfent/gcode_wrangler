@@ -1,7 +1,7 @@
 import typing as t
 from functools import partial
 
-from drawbot_client import Drawbot
+from .turtle_wrapper import Drawbot
 
 SIZE = 10
 
