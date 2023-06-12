@@ -1,4 +1,5 @@
-from drawbot_client import Client, Seripinski
+from drawbot_client import Client
+from drawbot_client.l_system import Seripinski
 
 client = Client("drawbot.hennenfent.com", "SuperSecretSessionKey", "ehennenfent")
 
@@ -20,4 +21,4 @@ with client.session() as session:
     system.evaluate(order=4)
 
     if input("Submit? (Y/N)").lower().startswith("y"):
-        system.queue()
+        session.queue()

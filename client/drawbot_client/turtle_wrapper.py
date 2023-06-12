@@ -135,7 +135,7 @@ class Drawbot:
     up = penup
 
     def pendown(self) -> None:
-        self._penup = True
+        self._pendown = True
         self._turtle.pencolor("#000000")
         if self.hide_inactive_moves:
             self._turtle.pendown()
