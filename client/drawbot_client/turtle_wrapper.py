@@ -38,8 +38,8 @@ class TurtleState:
 
 def _init_screen() -> _Screen:
     screen = Screen()
-    screen.setworldcoordinates(0, 0, X_WIDTH, Y_HEIGHT)
-    screen.screensize(X_WIDTH * 2, Y_HEIGHT * 2)
+    # screen.setworldcoordinates(0, 0, X_WIDTH, Y_HEIGHT)
+    # screen.screensize(X_WIDTH * 2, Y_HEIGHT * 2)
     screen.title("Drawbot Planner")
 
     return screen

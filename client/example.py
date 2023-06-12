@@ -6,12 +6,12 @@ with client.session() as session:
     drawbot = session.drawbot()
 
     drawbot.penup()
-    drawbot.goto(50, 50)
-    drawbot.pendown()
+    drawbot.goto(200, 200)
 
-    for _ in range(3):
-        drawbot.forward(100)
-        drawbot.left(90)
+    for _ in range(4):
+        drawbot.forward(160)
+        drawbot.pendown()
+        drawbot.right(90)
 
     drawbot.setheading(0)
 
@@ -19,4 +19,5 @@ with client.session() as session:
 
     system.evaluate(order=4)
 
-    session.queue()
+    if input("Submit? (Y/N)").lower().startswith("y"):
+        system.queue()
