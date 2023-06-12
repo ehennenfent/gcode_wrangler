@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "drawbot_client"
+authors = [
+    {name = "Eric Hennenfent", email = "eric@hennenfent.com"},
+]
+description = "Client-side library for interfacing with gcode server"
+requires-python = ">=3.9"
+dependencies = [
+    "requests"
+]
+dynamic = ["version"]
+
+[project.optional-dependencies]
+dev = ["black", "mypy"]
+
+[tool.black]
+line-length = 120

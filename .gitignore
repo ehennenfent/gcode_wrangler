@@ -21,4 +21,6 @@ Cargo.lock
 .env/
 gcode_wrangler/python/drawbot_control/__pycache__/
 gcode_wrangler/python/drawbot_control/*.so
-
+*.egg-info/
+.mypy_cache/
+*.pyc

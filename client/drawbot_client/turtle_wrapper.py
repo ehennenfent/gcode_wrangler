@@ -10,7 +10,6 @@ except ModuleNotFoundError as e:
 
 from dataclasses import dataclass
 from time import sleep
-from functools import partial
 import typing as t
 
 X_WIDTH = 400

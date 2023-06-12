@@ -1,5 +1,4 @@
-from client import Client
-from l_system import Seripinski
+from drawbot_client import Client, Seripinski
 
 client = Client("drawbot.hennenfent.com", "SuperSecretSessionKey", "ehennenfent")
 
