@@ -19,6 +19,6 @@ Cargo.lock
 
 # Pyo3
 .env/
-python/drawbot_control/__pycache__/
-python/drawbot_control/*.so
+gcode_wrangler/python/drawbot_control/__pycache__/
+gcode_wrangler/python/drawbot_control/*.so
 

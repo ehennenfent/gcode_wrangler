@@ -1,10 +1,10 @@
 try:
     from turtle import Screen, RawTurtle, Vec2D, _Screen
 except ModuleNotFoundError as e:
-    print("="*64)
+    print("=" * 64)
     print("Tk not found! You need to install a version of Python with Tk support")
     print("https://docs.python.org/3/library/tkinter.html")
-    print("="*64, "\n"*2)
+    print("=" * 64, "\n" * 2)
 
     raise e
 
