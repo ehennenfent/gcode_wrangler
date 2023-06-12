@@ -1,4 +1,13 @@
-from turtle import Screen, RawTurtle, Vec2D, _Screen
+try:
+    from turtle import Screen, RawTurtle, Vec2D, _Screen
+except ModuleNotFoundError as e:
+    print("="*64)
+    print("Tk not found! You need to install a version of Python with Tk support")
+    print("https://docs.python.org/3/library/tkinter.html")
+    print("="*64, "\n"*2)
+
+    raise e
+
 from dataclasses import dataclass
 from time import sleep
 from functools import partial
@@ -28,31 +37,6 @@ class TurtleState:
     pen_down: bool
 
 
-@dataclass(frozen=True)
-class _PartialTurtle:
-    forward: AnonFunc
-    backward: AnonFunc
-    left: AnonFunc
-    right: AnonFunc
-    penup: AnonFunc
-    pendown: AnonFunc
-    push_state: AnonFunc
-    pop_state: AnonFunc
-
-    @classmethod
-    def from_turtle(cls, turtle: "Drawbot", length: float, angle: float) -> "_PartialTurtle":
-        return cls(
-            forward=partial(turtle.forward, length),
-            backward=partial(turtle.backward, length),
-            left=partial(turtle.left, angle),
-            right=partial(turtle.right, angle),
-            penup=turtle.penup,
-            pendown=turtle.pendown,
-            push_state=turtle.push_state,
-            pop_state=turtle.pop_state,
-        )
-
-
 def _init_screen() -> _Screen:
     screen = Screen()
     screen.setworldcoordinates(0, 0, X_WIDTH, Y_HEIGHT)
@@ -77,9 +61,6 @@ class _TempPenState:
 
 
 class Drawbot:
-    def partial(self, length: float, angle: float) -> _PartialTurtle:
-        return _PartialTurtle.from_turtle(self, length, angle)
-
     def __init__(self, *, hide_inactive_moves: bool = False, speed: int = 0) -> None:
         self._screen: _Screen = _init_screen()
         self._turtle: RawTurtle = RawTurtle(canvas=self._screen, undobuffersize=0)
@@ -233,4 +214,3 @@ class Drawbot:
 
     def teleport(self, x: t.Union[float, Vec2D], y: t.Optional[float] = None) -> None:
         self._wrap_with_pen_state(False, self.goto, x, y)
-
