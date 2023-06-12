@@ -1,4 +1,5 @@
-"""Welcome to Pynecone! This file outlines the steps to create a basic app."""
+import typing as t
+
 from pcconfig import config
 
 import pynecone as pc
@@ -10,26 +11,42 @@ filename = f"{config.app_name}/{config.app_name}.py"
 class State(pc.State):
     """The app state."""
 
-    pass
+    strings: t.List[str] = [
+        "Foo",
+        "Bar",
+        "Baz",
+        "Qux",
+    ]
+
+    def next_item(self):
+        print(self.strings.pop())
+
+    
+def leftpane():
+    return pc.vstack(
+        pc.image(src="https://placekitten.com/450/600", width = "450px", height = "600px"),
+        pc.hstack(
+            pc.button("Go"),
+            pc.button("Pause"),
+            pc.button("Next", on_click=lambda: State.next_item()),
+        ),
+    )
+
+def queue_pane(text):
+    return pc.text(text)
+
+def rightpane():
+    return pc.vstack(
+        pc.foreach(State.strings, queue_pane)
+    )
 
 
 def index() -> pc.Component:
     return pc.center(
-        pc.vstack(
-            pc.heading("Welcome to Pynecone!", font_size="2em"),
-            pc.box("Get started by editing ", pc.code(filename, font_size="1em")),
-            pc.link(
-                "Check out our docs!",
-                href=docs_url,
-                border="0.1em solid",
-                padding="0.5em",
-                border_radius="0.5em",
-                _hover={
-                    "color": "rgb(107,99,246)",
-                },
-            ),
-            spacing="1.5em",
-            font_size="2em",
+        pc.hstack(
+            leftpane(),
+            rightpane(),
+            justify_content = "space-evenly"
         ),
         padding_top="10%",
     )
