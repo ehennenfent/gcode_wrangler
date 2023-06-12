@@ -14,6 +14,8 @@ from time import sleep
 
 X_WIDTH = 400
 Y_HEIGHT = 400
+PENUP_COLOR = "#BBBB00"
+PENDOWN_COLOR = "#000000"
 
 AnonFunc: t.TypeAlias = t.Callable[[], None]
 
@@ -127,7 +129,7 @@ class Drawbot:
     # Pen Controls
     def penup(self) -> None:
         self._pendown = False
-        self._turtle.pencolor("#FFFFBB")
+        self._turtle.pencolor(PENUP_COLOR)
         if self.hide_inactive_moves:
             self._turtle.penup()
 
@@ -136,7 +138,7 @@ class Drawbot:
 
     def pendown(self) -> None:
         self._pendown = True
-        self._turtle.pencolor("#000000")
+        self._turtle.pencolor(PENDOWN_COLOR)
         if self.hide_inactive_moves:
             self._turtle.pendown()
 
