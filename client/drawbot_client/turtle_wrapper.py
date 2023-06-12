@@ -1,5 +1,5 @@
 try:
-    from turtle import Screen, RawTurtle, Vec2D, _Screen
+    from turtle import RawTurtle, Screen, Vec2D, _Screen
 except ModuleNotFoundError as e:
     print("=" * 64)
     print("Tk not found! You need to install a version of Python with Tk support")
@@ -8,9 +8,9 @@ except ModuleNotFoundError as e:
 
     raise e
 
+import typing as t
 from dataclasses import dataclass
 from time import sleep
-import typing as t
 
 X_WIDTH = 400
 Y_HEIGHT = 400

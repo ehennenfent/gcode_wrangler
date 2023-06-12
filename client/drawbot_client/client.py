@@ -1,8 +1,9 @@
 import typing as t
+
 from drawbot_client import Drawbot
 
-class SessionManager():
 
+class SessionManager:
     def __enter__(self) -> "SessionManager":
         return self
 
@@ -11,12 +12,12 @@ class SessionManager():
 
     def drawbot(self) -> Drawbot:
         return Drawbot()
-    
+
     def queue(self) -> t.Any:
         pass
 
+
 class Client:
-    
     def __init__(self, host: str, sessionkey: str, username: str) -> None:
         self.host = host
         self.sessionkey = sessionkey
@@ -24,5 +25,3 @@ class Client:
 
     def session(self) -> SessionManager:
         return SessionManager()
-    
-

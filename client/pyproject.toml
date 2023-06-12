@@ -15,10 +15,13 @@ dependencies = [
 dynamic = ["version"]
 
 [project.optional-dependencies]
-dev = ["black", "mypy"]
+dev = ["black", "mypy", "ruff", "isort"]
 
 [tool.black]
 line-length = 120
 
 [tool.ruff]
 line-length = 120
+
+[tool.isort]
+profile = "black"
