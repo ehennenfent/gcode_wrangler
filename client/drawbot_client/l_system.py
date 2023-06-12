@@ -1,4 +1,5 @@
 from functools import partial
+from drawbot_client import Drawbot
 import typing as t
 
 SIZE = 10
@@ -154,8 +155,6 @@ class Dragon(LSystem):
 
 
 if __name__ == "__main__":
-    from .turtle_wrapper import Drawbot
-
     turtle = Drawbot()
 
     # seripinski = Seripinski(turtle.forward, turtle.right, turtle.left, SIZE)

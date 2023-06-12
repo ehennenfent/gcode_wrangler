@@ -1,27 +1,28 @@
+import typing as t
 from drawbot_client import Drawbot
 
 class SessionManager():
 
-    def __enter__(self):
+    def __enter__(self) -> "SessionManager":
         return self
 
-    def __exit__(self):
+    def __exit__(self, *_args: t.Any) -> None:
         pass
 
-    def drawbot(self):
+    def drawbot(self) -> Drawbot:
         return Drawbot()
     
-    def queue(self):
+    def queue(self) -> t.Any:
         pass
 
 class Client:
     
-    def __init__(self, host, sessionkey, username):
+    def __init__(self, host: str, sessionkey: str, username: str) -> None:
         self.host = host
         self.sessionkey = sessionkey
         self.username = username
 
-    def session():
+    def session(self) -> SessionManager:
         return SessionManager()
     
 
