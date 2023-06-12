@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "drawbot_server"
+authors = [
+    {name = "Eric Hennenfent", email = "eric@hennenfent.com"},
+]
+description = "Server library for receiving gcode and rendering it to a web page"
+requires-python = ">=3.9"
+dependencies = [
+    "pynecone"
+]
+dynamic = ["version"]
+
+[project.optional-dependencies]
+dev = ["black", "mypy", "ruff", "isort"]
+
+[tool.black]
+line-length = 120
+
+[tool.ruff]
+line-length = 120
+
+[tool.isort]
+profile = "black"
