@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A layout example that shows off a responsive product landing page.">
+    <title>Drawbot Interface</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+
+<div class="flexv">
+
+    <div class="header">
+        <div class="pure-menu-heading">Drawbot Controls</div>
+    </div>
+
+    <div id="layout" class="flexh even-spacing">
+        <div id="leftpane" class="flexv hcenter">
+            <div id="gcode_preview">
+                <img class="primary-image" src="http://placekitten.com/600/800">
+            </div>
+            <div id="control_panel" class="flexh hcenter gap15">
+                <button>Pause</button>
+                <button>Go</button>
+                <button>Next</button>
+            </div>
+        </div>
+        <div id="rightpane" class="flexv gap15">
+    {% for item in items %}
+            <div class="flexh vcenter gap15">
+                <img class="preview-image" src="http://placekitten.com/600/800">
+                <div>{{item}}</div>
+            </div>
+    {% endfor %}
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

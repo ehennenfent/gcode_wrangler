@@ -1,0 +1,49 @@
+* {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+.flexv {
+    display: flex;
+    flex-direction: column;
+}
+
+.flexh {
+    display: flex;
+    flex-direction: row;
+}
+
+.hcenter {
+    justify-content: center;
+}
+
+.even-spacing {
+    justify-content: space-evenly;
+}
+
+.is-left {
+    text-align: left;
+}
+
+.header {
+    padding-bottom: 2rem
+}
+
+.vcenter {
+    align-items: center;
+}
+
+.gap15 {
+    gap: 15px;
+}
+
+.primary-image {
+    width: 600px;
+    height: 800px;
+}
+
+.preview-image {
+    width: 60px;
+    height: 80px;
+}

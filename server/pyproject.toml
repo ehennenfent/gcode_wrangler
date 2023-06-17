@@ -10,7 +10,8 @@ authors = [
 description = "Server library for receiving gcode and rendering it to a web page"
 requires-python = ">=3.9"
 dependencies = [
-    "pynecone"
+    "fastapi",
+    "jinja2",
 ]
 dynamic = ["version"]
 

@@ -1,0 +1,1 @@
+`uvicorn drawbot_server.main:app --reload --port 8002`
