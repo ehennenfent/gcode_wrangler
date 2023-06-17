@@ -1,0 +1,6 @@
+{% for job in jobs %}
+<div class="flexh vcenter">
+    <img class="preview-image" src="{{job.image_path}}">
+    <div style="max-width: 25rem; word-wrap: break-word;">{{job.comment}}</div>
+</div>
+{% endfor %}

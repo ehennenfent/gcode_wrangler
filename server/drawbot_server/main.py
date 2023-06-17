@@ -24,6 +24,12 @@ all_jobs = [GcodeJob(comment="foobar"),
 
 @app.get("/", response_class=HTMLResponse)
 async def read_item(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request,
-                                                     "primary_job": primary_job,
-                                                     "jobs": all_jobs})
+    return templates.TemplateResponse("index.html", {"request": request})
+
+@app.get("/primary_job", response_class=HTMLResponse)
+async def get_progress(request: Request):
+    return templates.TemplateResponse("primary_job.html", {"request": request, "primary_job": primary_job})
+
+@app.get("/job_list", response_class=HTMLResponse)
+async def get_progress(request: Request):
+    return templates.TemplateResponse("job_list.html", {"request": request, "jobs": all_jobs})

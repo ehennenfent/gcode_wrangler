@@ -6,6 +6,7 @@
     <meta name="description" content="A layout example that shows off a responsive product landing page.">
     <title>Drawbot Interface</title>
     <link rel="stylesheet" href="/static/styles.css">
+    <script src="https://unpkg.com/htmx.org@1.9.2" integrity="sha384-L6OqL9pRWyyFU3+/bjdSri+iIphTN/bvYyM37tICVyOJkWZLpP2vGn6VUEXgzg6h" crossorigin="anonymous"></script>
 </head>
 <body>
 
@@ -17,9 +18,7 @@
 
     <div id="layout" class="flexh even-spacing">
         <div id="leftpane" class="flexv hcenter">
-            <div id="gcode_preview">
-                <img class="primary-image" src="{{primary_job.image_path}}">
-            </div>
+            <div hx-get="/primary_job" hx-trigger="load"></div>
             <div id="control_panel" class="flexh hcenter">
                 <button>Pause</button>
                 <button>Go</button>
@@ -27,12 +26,7 @@
             </div>
         </div>
         <div id="rightpane" class="flexv">
-    {% for job in jobs %}
-            <div class="flexh vcenter">
-                <img class="preview-image" src="{{job.image_path}}">
-                <div style="max-width: 25rem; word-wrap: break-word;">{{job.comment}}</div>
-            </div>
-    {% endfor %}
+            <div hx-get="/job_list" hx-trigger="load, every 5s" class="flexv"></div>
         </div>
     </div>
 
