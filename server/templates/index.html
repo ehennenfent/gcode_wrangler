@@ -21,7 +21,7 @@
             <div hx-get="/primary_job" hx-trigger="load"></div>
             <div id="control_panel" class="flexh hcenter">
                 <button>Pause</button>
-                <button>Go</button>
+                <button hx-post="/run_current" hx-swap="none">Go</button>
                 <button>Next</button>
             </div>
         </div>

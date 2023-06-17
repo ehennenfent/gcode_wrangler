@@ -1,3 +1,4 @@
 <div id="gcode_preview">
     <img class="primary-image" src="{{primary_job.image_path}}">
 </div>
+<div hx-get="/progress", hx-trigger="load, every 2s"></div>
