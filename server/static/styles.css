@@ -7,11 +7,13 @@
 .flexv {
     display: flex;
     flex-direction: column;
+    gap: 10px;
 }
 
 .flexh {
     display: flex;
     flex-direction: row;
+    gap: 10px;
 }
 
 .hcenter {
