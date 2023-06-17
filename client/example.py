@@ -21,4 +21,4 @@ with client.session() as session:
     system.evaluate(order=4)
 
     if input("Submit? (Y/N)").lower().startswith("y"):
-        session.queue()
+        session.queue("example drawing")

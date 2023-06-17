@@ -13,7 +13,7 @@ class SessionManager:
     def drawbot(self) -> Drawbot:
         return Drawbot()
 
-    def queue(self) -> t.Any:
+    def queue(self, comment: str = "") -> t.Any:
         pass
 
 

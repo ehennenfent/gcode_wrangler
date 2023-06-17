@@ -10,7 +10,6 @@ except ModuleNotFoundError as e:
 
 import typing as t
 from dataclasses import dataclass
-from time import sleep
 
 X_WIDTH = 400
 Y_HEIGHT = 400
@@ -24,11 +23,6 @@ AnonFunc: t.TypeAlias = t.Callable[[], None]
 class MoveRecord:
     dest: Vec2D
     pen_down: bool
-
-
-@dataclass(frozen=True)
-class SleepRecord:
-    duration: float
 
 
 @dataclass(frozen=True)
@@ -70,7 +64,7 @@ class Drawbot:
         self.hide_inactive_moves: bool = hide_inactive_moves
 
         self._pendown: bool = self._turtle.isdown()
-        self._movements: t.List[t.Union[MoveRecord, SleepRecord]] = [MoveRecord(self.position(), False)]
+        self._movements: t.List[MoveRecord] = [MoveRecord(self.position(), False)]
         self._state_stack: t.List[TurtleState] = []
 
     # Motion
@@ -180,10 +174,6 @@ class Drawbot:
         return self._screen.bgpic(new_pic)
 
     # Supplemental
-    def wait(self, time: float) -> None:
-        self._movements.append(SleepRecord(time))
-        sleep(time)
-
     def push_state(self) -> None:
         self._state_stack.append(
             TurtleState(
