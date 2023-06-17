@@ -18,7 +18,7 @@
     <div id="layout" class="flexh even-spacing">
         <div id="leftpane" class="flexv hcenter">
             <div id="gcode_preview">
-                <img class="primary-image" src="http://placekitten.com/600/800">
+                <img class="primary-image" src="{{primary_job.image_path}}">
             </div>
             <div id="control_panel" class="flexh hcenter">
                 <button>Pause</button>
@@ -27,10 +27,10 @@
             </div>
         </div>
         <div id="rightpane" class="flexv">
-    {% for item in items %}
+    {% for job in jobs %}
             <div class="flexh vcenter">
-                <img class="preview-image" src="http://placekitten.com/600/800">
-                <div>{{item}}</div>
+                <img class="preview-image" src="{{job.image_path}}">
+                <div style="max-width: 25rem; word-wrap: break-word;">{{job.comment}}</div>
             </div>
     {% endfor %}
         </div>
