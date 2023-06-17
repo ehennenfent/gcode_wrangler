@@ -1,1 +1,3 @@
-{{primary_job.get_progress}}
+{% if primary_job.progress %}
+<progress value="{{primary_job.progress}}" max="100" style="width: 100%"></progress>
+{% endif %}

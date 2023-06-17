@@ -1,25 +1,24 @@
-from fastapi import FastAPI, Request, BackgroundTasks
+from fastapi import FastAPI, Request, BackgroundTasks, Response
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from time import sleep
+from queue import Queue
+import typing as t
 
 from pydantic import BaseModel
 
 class GcodeJob(BaseModel):
     image_path: str = "https://fakeimg.pl/800x600"
     comment: str = ""
-    progress: int = 0
-
-    @property
-    def get_progress(self):
-        return f"{self.progress}%"
+    progress: t.Optional[int]
     
     def start_background_task(self):
         self.progress = 0
         for _ in range(100):
             self.progress += 1
             sleep(1)
+        self.progress = None
 
 app = FastAPI()
 
@@ -52,6 +51,13 @@ async def get_progress(request: Request):
     return templates.TemplateResponse("progress.html", {"request": request, "primary_job": primary_job})
 
 @app.post("/run_current")
-async def start_background_task(background_tasks: BackgroundTasks):
+async def start_background_task(response: Response, background_tasks: BackgroundTasks):
+    response.headers["HX-Trigger"] = "start_job"
     background_tasks.add_task(primary_job.start_background_task)
-    return "Go"
+    return {}
+
+@app.post("/next")
+async def next_job(response: Response):
+    response.headers["HX-Trigger"] = "next_job"
+    primary_job = all_jobs.pop(0)
+    return {}
