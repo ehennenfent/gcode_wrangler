@@ -13,8 +13,7 @@ templates = Jinja2Templates(directory="templates")
 # Global state
 primary_job: t.Optional[GcodeJob] = None
 all_jobs: t.List[GcodeJob] = []
-_session_key = "fakesessionkey"
-ephemeral_keys = {}
+
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
@@ -42,7 +41,8 @@ async def get_progress(request: Request):
 @app.post("/run_current")
 async def start_background_task(response: Response, background_tasks: BackgroundTasks):
     response.headers["HX-Trigger"] = "start_job"
-    background_tasks.add_task(primary_job.start_background_task)
+    assert primary_job is not None
+    background_tasks.add_task(primary_job.run)
     return {}
 
 
@@ -54,19 +54,9 @@ async def next_job(response: Response):
     return {}
 
 
-@app.post("/authenticate")
-async def authenticate(username: str, session_key: str):
-    if session_key == _session_key:
-        newkey = "ephemeral key"
-        ephemeral_keys.setdefault(username, set()).add(newkey)
-        return newkey
-
-
 @app.post("/submit")
 async def post_job(new_job: PostedJob, background_tasks: BackgroundTasks):
     global primary_job
-    if new_job.ephemeral_key not in ephemeral_keys.get(new_job.username, set()):
-        return
     processed = GcodeJob.from_posted(new_job)
     if primary_job is None:
         primary_job = processed

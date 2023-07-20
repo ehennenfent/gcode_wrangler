@@ -9,7 +9,7 @@
     - [ ] Admin page to cancel, clear queue
     - [ ] Make CSS a tiny bit less barebones
 - [ ] Authenticate with session key
-- [ ] Receive gcode from clients, queue for execution
+- [x] Receive gcode from clients, queue for execution
 - [ ] Send gcode jobs to server
 - [ ] Get machine details from server
 
