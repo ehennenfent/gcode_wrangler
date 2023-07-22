@@ -1,5 +1,3 @@
-use pyo3::prelude::*;
-
 pub mod generic;
 pub mod grbl;
 pub mod marlin;
@@ -63,70 +61,47 @@ impl Vec3 {
     }
 }
 
-#[pyclass]
 struct LinearMove {
     target: Vec3,
     feedrate: Option<u32>,
 }
 
-#[pyclass]
 struct LinearDraw {
     target: Vec3,
     feedrate: Option<u32>,
 }
 
-#[pyclass]
 struct Pause {
     ms: u32,
 }
 
-#[pyclass]
 struct SetPositionMode {
     positioning: Position,
 }
 
-#[pyclass]
 struct SetCurrentPosition {
     current: Vec3,
 }
 
-#[pyclass]
 struct Activate {}
-#[pyclass]
 struct Deactivate {}
 
-#[pyclass]
 struct SetUnits {
     units: Units,
 }
 
-#[pyclass]
 struct Home {
     x: bool,
     y: bool,
     z: bool,
 }
 
-#[pyclass]
 struct StepperControl {
     x: StepperState,
     y: StepperState,
     z: StepperState,
 }
 
-#[pyclass]
 struct EndProgram {}
 
-#[pyclass]
 struct SetXY {}
-
-#[pymodule]
-fn gcode_wrangler(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
-    m.add_class::<LinearMove>()?;
-    m.add_class::<LinearDraw>()?;
-    m.add_class::<Pause>()?;
-    m.add_class::<Activate>()?;
-    m.add_class::<Deactivate>()?;
-
-    Ok(())
-}

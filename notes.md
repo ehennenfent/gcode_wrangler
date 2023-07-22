@@ -21,8 +21,9 @@
 - [ ] Simulate move set
 - [ ] HTTP Endpoints:
     - [ ] Send Gcode
-    - [ ] Get status
+    - [ ] Run Gcode
     - [ ] Pause
-    - [ ] Get simulation
+    - [ ] Start simulation
+    - [ ] Get simulation results
+    - [ ] Get status
     - [ ] Get machine details
-
