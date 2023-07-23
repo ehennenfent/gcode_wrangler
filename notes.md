@@ -20,7 +20,7 @@
     - [ ] Pausing
 - [ ] Simulate move set
 - [ ] HTTP Endpoints:
-    - [ ] Send Gcode
+    - [x] Send Gcode
     - [ ] Run Gcode
     - [ ] Pause
     - [ ] Start simulation
