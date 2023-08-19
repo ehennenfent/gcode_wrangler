@@ -1,19 +1,15 @@
 use crate::{
-    Activate, Deactivate, EndProgram, GCode, Home, LinearMove, MachineType, StepperControl, Vec3, Operation
+    Activate, Deactivate, EndProgram, GCode, Home, LinearMove, MachineType, StepperControl, Vec3,
 };
 
 struct Marlin;
 impl MachineType for Marlin {
-    fn preamble() -> Vec<Operation> {
+    fn preamble() -> Vec<Box<dyn GCode<Self>>> {
         vec![]
     }
 }
 
 impl GCode<Marlin> for Activate {
-    fn to_op(self) -> Operation {
-        Operation::Activate { op: self }
-    }
-
     fn render(&self) -> String {
         <LinearMove as GCode<Marlin>>::render(&LinearMove {
             target: Vec3 {
@@ -27,10 +23,6 @@ impl GCode<Marlin> for Activate {
 }
 
 impl GCode<Marlin> for Deactivate {
-    fn to_op(self) -> Operation {
-        Operation::Deactivate { op: self }
-    }
-
     fn render(&self) -> String {
         <LinearMove as GCode<Marlin>>::render(&LinearMove {
             target: Vec3 {
@@ -44,10 +36,6 @@ impl GCode<Marlin> for Deactivate {
 }
 
 impl GCode<Marlin> for Home {
-    fn to_op(self) -> Operation {
-        Operation::Home { op: self }
-    }
-
     fn render(&self) -> String {
         let mut parts: Vec<&str> = vec!["G28"];
         if self.x {
@@ -65,10 +53,6 @@ impl GCode<Marlin> for Home {
 }
 
 impl GCode<Marlin> for StepperControl {
-    fn to_op(self) -> Operation {
-        Operation::StepperControl { op: self }
-    }
-
     fn render(&self) -> String {
         let mut enable: Vec<&str> = vec!["M17"];
         let mut disable: Vec<&str> = vec!["M18"];
@@ -100,10 +84,6 @@ impl GCode<Marlin> for StepperControl {
 }
 
 impl GCode<Marlin> for EndProgram {
-    fn to_op(self) -> Operation {
-        Operation::EndProgram { op: self }
-    }
-
     fn render(&self) -> String {
         "M5".to_string()
     }
