@@ -1,20 +1,18 @@
 use axum::{extract::Json, extract::Path, extract::State, routing::get, routing::post, Router};
 
 use config::Config;
+use gcode_wrangler::models::{MachineDetails, Movement};
 use std::collections::hash_map::{DefaultHasher, HashMap};
 use std::hash::{Hash, Hasher};
 use std::sync::{Arc, Mutex};
-use gcode_wrangler::models::{MachineDetails, Movement};
-use gcode_wrangler::MachineType;
 
 type Handle = u64;
 
-#[derive(Clone, Default)]
+#[derive(Clone)]
 pub struct AppState {
     cached_movements: Arc<Mutex<HashMap<u64, Vec<Movement>>>>,
     machine_details: MachineDetails,
 }
-
 
 #[tokio::main]
 async fn main() {
@@ -31,7 +29,7 @@ async fn main() {
 
     let state = AppState {
         machine_details: machine,
-        ..Default::default()
+        cached_movements: Default::default(),
     };
 
     let app = Router::new()

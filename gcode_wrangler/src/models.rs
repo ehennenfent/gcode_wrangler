@@ -3,6 +3,8 @@ use std::collections::hash_map::{DefaultHasher, HashMap};
 use std::hash::{Hash, Hasher};
 use std::sync::{Arc, Mutex};
 
+use crate::Flavor;
+
 #[derive(Clone, Deserialize, Default, Serialize)]
 pub struct Vec2D {
     x: f32,
@@ -22,11 +24,10 @@ pub struct Movement {
     pen_down: bool,
 }
 
-
-#[derive(Clone, Default, Serialize)]
+#[derive(Clone, Serialize)]
 pub struct MachineDetails {
     dimensions: Vec2D,
-    flavor: String,
+    flavor: Flavor,
     device: String,
 }
 
@@ -48,13 +49,12 @@ impl From<HashMap<String, String>> for MachineDetails {
             flavor: {
                 if let Some(maybe_match) = fromval.get("flavor") {
                     match maybe_match.as_str() {
-                        "GRBL" => "GRBL",
-                        "Marlin" => "Marlin",
+                        "GRBL" => Flavor::GRBL,
+                        "Marlin" => Flavor::Marlin,
                         unknown => {
                             panic!("Unknown gcode flavor: {unknown}")
                         }
                     }
-                    .to_string()
                 } else {
                     panic!("Missing config value: flavor")
                 }
