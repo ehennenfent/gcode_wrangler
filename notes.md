@@ -14,10 +14,12 @@
 - [ ] Get machine details from server
 
 ## GCode Host:
+- [x] Read machine details from config
 - [x] GCode type system
 - [ ] Serial port communicator
     - [ ] GCode Sending
     - [ ] Pausing
+- [ ] Convert uploaded movements into GCode
 - [ ] Simulate move set
 - [ ] HTTP Endpoints:
     - [x] Send Gcode

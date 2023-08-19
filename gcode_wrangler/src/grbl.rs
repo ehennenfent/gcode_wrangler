@@ -1,10 +1,11 @@
-use crate::{
-    Activate, Deactivate, EndProgram, GCode, Home,
-    MachineType,
-};
+use crate::{Activate, Deactivate, EndProgram, GCode, Home, MachineType};
 
 struct Grbl;
-impl MachineType for Grbl {}
+impl MachineType for Grbl {
+    fn preamble() -> Vec<Box<dyn GCode<Self>>> {
+        vec![]
+    }
+}
 
 impl GCode<Grbl> for Activate {
     fn render(&self) -> String {

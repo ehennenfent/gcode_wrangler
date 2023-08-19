@@ -1,0 +1,4 @@
+xdim = 400
+ydim = 400
+flavor = "GRBL"
+name = "Drawbot"

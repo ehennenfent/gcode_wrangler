@@ -1,6 +1,6 @@
 use crate::{
-    GCode, LinearDraw, LinearMove,
-    MachineType, Pause, Position, SetCurrentPosition, SetPositionMode, SetUnits, SetXY,
+    GCode, LinearDraw, LinearMove, MachineType, Pause, Position, SetCurrentPosition,
+    SetPositionMode, SetUnits, SetXY,
 };
 
 impl<T: MachineType> GCode<T> for SetXY {

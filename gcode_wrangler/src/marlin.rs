@@ -1,11 +1,13 @@
 use crate::{
-    Activate, Deactivate, EndProgram, GCode, Home, LinearMove,
-    MachineType, StepperControl,
-    Vec3,
+    Activate, Deactivate, EndProgram, GCode, Home, LinearMove, MachineType, StepperControl, Vec3,
 };
 
 struct Marlin;
-impl MachineType for Marlin {}
+impl MachineType for Marlin {
+    fn preamble() -> Vec<Box<dyn GCode<Self>>> {
+        vec![]
+    }
+}
 
 impl GCode<Marlin> for Activate {
     fn render(&self) -> String {

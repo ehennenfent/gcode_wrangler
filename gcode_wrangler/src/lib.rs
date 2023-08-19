@@ -2,7 +2,9 @@ pub mod generic;
 pub mod grbl;
 pub mod marlin;
 
-trait MachineType {}
+pub trait MachineType {
+    fn preamble() -> Vec<Box<dyn GCode<Self>>>;
+}
 
 trait GCode<T: MachineType> {
     fn render(&self) -> String;
