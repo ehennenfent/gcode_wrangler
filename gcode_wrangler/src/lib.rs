@@ -1,12 +1,13 @@
 pub mod generic;
 pub mod grbl;
 pub mod marlin;
+pub mod models;
 
 pub trait MachineType {
     fn preamble() -> Vec<Box<dyn GCode<Self>>>;
 }
 
-trait GCode<T: MachineType> {
+pub trait GCode<T: MachineType> {
     fn render(&self) -> String;
 }
 
