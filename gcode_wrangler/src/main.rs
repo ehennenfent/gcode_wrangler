@@ -2,6 +2,7 @@ use axum::{extract::Json, extract::Path, extract::State, routing::get, routing::
 
 use config::Config;
 use gcode_wrangler::models::{MachineDetails, Movement};
+use gcode_wrangler::{GCode, Position, to_gcode};
 use std::collections::hash_map::{DefaultHasher, HashMap};
 use std::hash::{Hash, Hasher};
 use std::sync::{Arc, Mutex};
@@ -10,7 +11,8 @@ type Handle = u64;
 
 #[derive(Clone)]
 pub struct AppState {
-    cached_movements: Arc<Mutex<HashMap<u64, Vec<Movement>>>>,
+    movements: Arc<Mutex<HashMap<Handle, Vec<Movement>>>>,
+    cached_gcode: Arc<Mutex<HashMap<Handle, Vec<GCode>>>>,
     machine_details: MachineDetails,
 }
 
@@ -29,7 +31,8 @@ async fn main() {
 
     let state = AppState {
         machine_details: machine,
-        cached_movements: Default::default(),
+        movements: Default::default(),
+        cached_gcode: Default::default(),
     };
 
     let app = Router::new()
@@ -59,7 +62,7 @@ async fn post_movements(
     movements.hash(&mut s);
     let hash = s.finish();
     state
-        .cached_movements
+        .movements
         .lock()
         .unwrap()
         .insert(hash, movements);
@@ -69,4 +72,17 @@ async fn post_movements(
 async fn post_pause(Path(handle): Path<Handle>) {}
 async fn post_run(Path(handle): Path<Handle>) {}
 async fn get_run(Path(handle): Path<Handle>) {}
-async fn get_analysis(Path(handle): Path<Handle>) {}
+async fn get_analysis(
+    State(state): State<AppState>,
+    Path(handle): Path<Handle>) {
+    let rendered: Vec<GCode> = match state.movements.lock().unwrap().get(&handle) {
+        Some(movements) => to_gcode(movements, Position::Relative),
+        None => todo!(),
+    };
+
+    state
+    .cached_gcode
+    .lock()
+    .unwrap()
+    .insert(handle, rendered);
+}

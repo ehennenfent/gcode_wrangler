@@ -258,7 +258,7 @@ impl Add<Vec3> for Vec3 {
     }
 }
 
-fn to_gcode(movements: &Vec<Movement>, position_mode: Position) -> Vec<GCode> {
+pub fn to_gcode(movements: &Vec<Movement>, position_mode: Position) -> Vec<GCode> {
     let mut active: bool = false;
     let mut position = Vec3 {
         x: Some(0.0),
