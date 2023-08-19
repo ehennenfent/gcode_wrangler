@@ -4,29 +4,33 @@ pub mod marlin;
 pub mod models;
 
 pub trait MachineType {
-    fn preamble() -> Vec<Box<dyn GCode<Self>>>;
+    fn preamble() -> Vec<Operation>;
 }
 
 pub trait GCode<T: MachineType> {
     fn render(&self) -> String;
+
+    // I don't really like this pattern, but without specialization it's the easiest way to
+    // pass around compatible objects
+    fn to_op(self) -> Operation;
 }
 
-enum Position {
+pub enum Position {
     Absolute,
     Relative,
 }
 
-enum Units {
+pub enum Units {
     Inches,
     Millimeters,
 }
 
-enum StepperState {
+pub enum StepperState {
     Enabled,
     Disabled,
 }
 
-struct SimulationState {
+pub struct SimulationState {
     real_position: Vec3,
     virtual_position: Vec3,
     max_travel: Vec3,
@@ -36,7 +40,7 @@ struct SimulationState {
     active: bool,
 }
 
-struct Vec3 {
+pub struct Vec3 {
     x: Option<f32>,
     y: Option<f32>,
     z: Option<f32>,
@@ -64,47 +68,62 @@ impl Vec3 {
     }
 }
 
-struct LinearMove {
+pub struct LinearMove {
     target: Vec3,
     feedrate: Option<u32>,
 }
 
-struct LinearDraw {
+pub struct LinearDraw {
     target: Vec3,
     feedrate: Option<u32>,
 }
 
-struct Pause {
+pub struct Pause {
     ms: u32,
 }
 
-struct SetPositionMode {
+pub struct SetPositionMode {
     positioning: Position,
 }
 
-struct SetCurrentPosition {
+pub struct SetCurrentPosition {
     current: Vec3,
 }
 
-struct Activate {}
-struct Deactivate {}
+pub struct Activate {}
+pub struct Deactivate {}
 
-struct SetUnits {
+pub struct SetUnits {
     units: Units,
 }
 
-struct Home {
+pub struct Home {
     x: bool,
     y: bool,
     z: bool,
 }
 
-struct StepperControl {
+pub struct StepperControl {
     x: StepperState,
     y: StepperState,
     z: StepperState,
 }
 
-struct EndProgram {}
+pub struct EndProgram {}
 
-struct SetXY {}
+pub struct SetXY {}
+
+pub enum Operation {
+    LinearMove {op: LinearMove},
+    LinearDraw {op: LinearDraw},
+    Pause {op: Pause},
+    SetPositionMode {op: SetPositionMode},
+    SetCurrentPosition {op: SetCurrentPosition},
+    Activate {op: Activate},
+    Deactivate {op: Deactivate},
+    SetUnits {op: SetUnits},
+    Home {op: Home},
+    StepperControl {op: StepperControl},
+    EndProgram {op: EndProgram},
+    SetXY {op: SetXY},
+}
