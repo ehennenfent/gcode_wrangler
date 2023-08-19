@@ -1,4 +1,6 @@
+use models::{MachineDetails, Movement, Vec2D};
 use serde::{Deserialize, Serialize};
+use std::ops::Add;
 
 pub mod models;
 
@@ -6,6 +8,12 @@ pub mod models;
 pub enum Flavor {
     GRBL,
     Marlin,
+}
+
+impl Flavor {
+    fn render(&self, operations: &Vec<GCode>) -> Vec<String> {
+        operations.into_iter().map(|op| op.render(self)).collect()
+    }
 }
 
 #[derive(Debug)]
@@ -36,7 +44,7 @@ pub struct SimulationState {
     active: bool,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub struct Vec3 {
     x: Option<f32>,
     y: Option<f32>,
@@ -214,4 +222,89 @@ impl GCode {
             }
         }
     }
+}
+
+impl From<Vec2D> for Vec3 {
+    fn from(value: Vec2D) -> Self {
+        Vec3 {
+            x: Some(value.x),
+            y: Some(value.y),
+            z: None,
+        }
+    }
+}
+
+impl Add<Vec3> for Vec3 {
+    type Output = Self;
+
+    fn add(self, rhs: Vec3) -> Self::Output {
+        Vec3 {
+            x: match (self.x, rhs.x) {
+                (None, None) => None,
+                (Some(left), Some(right)) => Some(left + right),
+                _ => unimplemented!(), // yes, yes, I know
+            },
+            y: match (self.y, rhs.y) {
+                (None, None) => None,
+                (Some(left), Some(right)) => Some(left + right),
+                _ => unimplemented!(),
+            },
+            z: match (self.z, rhs.z) {
+                (None, None) => None,
+                (Some(left), Some(right)) => Some(left + right),
+                _ => unimplemented!(),
+            },
+        }
+    }
+}
+
+fn to_gcode(movements: &Vec<Movement>, position_mode: Position) -> Vec<GCode> {
+    let mut active: bool = false;
+    let mut position = Vec3 {
+        x: Some(0.0),
+        y: Some(0.0),
+        z: None,
+    };
+
+    let mut as_gcode: Vec<GCode> = Vec::new();
+
+    for mv in movements {
+        let dest: Vec3 = match position_mode {
+            Position::Absolute => Vec3::from(mv.dest),
+            Position::Relative => position + Vec3::from(mv.dest),
+        };
+
+        match (active, mv.pen_down) {
+            (true, true) => {
+                as_gcode.push(GCode::LinearDraw {
+                    target: dest,
+                    feedrate: None,
+                });
+            }
+            (true, false) => {
+                as_gcode.push(GCode::Deactivate);
+                as_gcode.push(GCode::LinearMove {
+                    target: dest,
+                    feedrate: None,
+                });
+                active = mv.pen_down;
+            }
+            (false, true) => {
+                as_gcode.push(GCode::Activate);
+                as_gcode.push(GCode::LinearDraw {
+                    target: dest,
+                    feedrate: None,
+                });
+                active = mv.pen_down;
+            }
+            (false, false) => {
+                as_gcode.push(GCode::LinearMove {
+                    target: dest,
+                    feedrate: None,
+                });
+            }
+        }
+    }
+
+    as_gcode
 }

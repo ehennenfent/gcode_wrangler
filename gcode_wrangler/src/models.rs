@@ -5,10 +5,10 @@ use std::sync::{Arc, Mutex};
 
 use crate::Flavor;
 
-#[derive(Clone, Deserialize, Default, Serialize)]
+#[derive(Clone, Deserialize, Default, Serialize, Copy)]
 pub struct Vec2D {
-    x: f32,
-    y: f32,
+    pub x: f32,
+    pub y: f32,
 }
 
 impl Hash for Vec2D {
@@ -20,8 +20,8 @@ impl Hash for Vec2D {
 
 #[derive(Deserialize, Hash, Default)]
 pub struct Movement {
-    dest: Vec2D,
-    pen_down: bool,
+    pub dest: Vec2D,
+    pub pen_down: bool,
 }
 
 #[derive(Clone, Serialize)]
