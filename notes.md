@@ -1,7 +1,7 @@
 ## Client:
 - [x] Simulate locally with Turtle
 - [x] Convert turtle program into move set
-- [ ] Connect to web UI and submit moveset 
+- [x] Connect to web UI and submit moveset 
 
 ## Frontend Server:
 - [x] Web Interface
