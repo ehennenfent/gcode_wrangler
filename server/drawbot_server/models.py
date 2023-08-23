@@ -4,6 +4,8 @@ from time import sleep
 
 from pydantic import BaseModel
 
+from .client import GcodeClient, Handle
+
 
 class Status(Enum):
     RECEIVED = auto()  # Before preprocessing has completed
@@ -33,18 +35,23 @@ class GcodeJob(PostedJob):
     image_path: str = "https://fakeimg.pl/800x600"
     progress: t.Optional[int] = None
     status: Status = Status.RECEIVED
+    handle: t.Optional[Handle] = None
 
     def run(self) -> None:
+        client: GcodeClient = GcodeClient()
+
         # State machine
         assert self.status == Status.READY
         self.status = Status.RUNNING
 
-        # Upload to server
-        # TODO
+        assert self.handle is not None
+
+        client.start_run(self.handle)
 
         # Monitor progress
         self.progress = 0
         for _ in range(100):
+            # self.progress = client.get_run(self.handle)
             self.progress += 1
             sleep(1)
 
@@ -57,4 +64,5 @@ class GcodeJob(PostedJob):
         return cls(comment=posted.comment, username=posted.username, movements=posted.movements)
 
     def analyze(self) -> None:
+        self.handle = GcodeClient().upload(self.movements)
         self.status = Status.READY
