@@ -4,8 +4,10 @@ from fastapi import BackgroundTasks, FastAPI, Request, Response
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from sse_starlette.sse import EventSourceResponse
 
 from .models import GcodeJob, PostedJob
+from .sse_channels import QueueManager
 
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
@@ -14,6 +16,8 @@ templates = Jinja2Templates(directory="templates")
 primary_job: t.Optional[GcodeJob] = None
 all_jobs: t.List[GcodeJob] = []
 
+
+event_manager = QueueManager()
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
@@ -39,7 +43,7 @@ async def get_progress(request: Request):
 
 
 @app.post("/run_current")
-async def start_background_task(response: Response, background_tasks: BackgroundTasks):
+async def run_current_job(response: Response, background_tasks: BackgroundTasks):
     response.headers["HX-Trigger"] = "start_job"
     assert primary_job is not None
     background_tasks.add_task(primary_job.run)
@@ -57,9 +61,23 @@ async def next_job(response: Response):
 @app.post("/submit")
 async def post_job(new_job: PostedJob, background_tasks: BackgroundTasks):
     global primary_job
+    print(f"Received {len(new_job.movements)} instruction gcode job from {new_job.username}: {new_job.comment}")
     processed = GcodeJob.from_posted(new_job)
     if primary_job is None:
         primary_job = processed
     else:
         all_jobs.append(processed)
     background_tasks.add_task(processed.analyze)
+    event_manager.broadcast("new_job")
+
+
+@app.get("/event_stream")
+async def event_stream(request: Request):
+    async def event_sub():
+        with event_manager.join() as channel:
+            while True:
+                if await request.is_disconnected():
+                    break
+                yield {"event": await channel.read(), "data": channel.handle}
+
+    return EventSourceResponse(event_sub())

@@ -8,10 +8,11 @@
     <link rel="stylesheet" href="/static/styles.css">
     <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
     <script src="https://unpkg.com/htmx.org@1.9.2" integrity="sha384-L6OqL9pRWyyFU3+/bjdSri+iIphTN/bvYyM37tICVyOJkWZLpP2vGn6VUEXgzg6h" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/htmx.org/dist/ext/sse.js"></script>
 </head>
 <body>
 
-<div class="flexv">
+<div class="flexv" hx-ext="sse" sse-connect="/event_stream">
 
     <div class="header">
         <div class="pure-menu-heading">Drawbot Controls</div>
@@ -19,7 +20,7 @@
 
     <div id="layout" class="flexh even-spacing">
         <div id="leftpane" class="flexv hcenter">
-            <div hx-get="/primary_job" hx-trigger="load, next_job from:body"></div>
+            <div hx-get="/primary_job" hx-trigger="load, next_job from:body, sse:new_job, every 15s"></div>
             <div id="control_panel" class="flexh hcenter">
                 <button hx-post="/pause" hx-swap="none">Pause</button>
                 <button hx-post="/run_current" hx-swap="none">Go</button>
@@ -27,7 +28,7 @@
             </div>
         </div>
         <div id="rightpane" class="flexv">
-            <div hx-get="/job_list" hx-trigger="load, next_job from:body, every 10s" class="flexv"></div>
+            <div hx-get="/job_list" hx-trigger="load, next_job from:body, sse:new_job, every 15s" class="flexv"></div>
         </div>
     </div>
 
