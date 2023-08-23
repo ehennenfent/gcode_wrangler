@@ -24,6 +24,13 @@ class MoveRecord:
     dest: Vec2D
     pen_down: bool
 
+    def as_dict(self) -> t.Dict:
+        x, y = self.dest
+        return {
+            "dest": {"x": x, "y": y},
+            "pen_down": self.pen_down,
+        }
+
 
 @dataclass(frozen=True)
 class TurtleState:

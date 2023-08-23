@@ -1,7 +1,7 @@
 from drawbot_client import Client
 from drawbot_client.l_system import Seripinski
 
-client = Client("drawbot.hennenfent.com", "SuperSecretSessionKey", "ehennenfent")
+client = Client("localhost:8002", "SuperSecretSessionKey", "ehennenfent")
 
 with client.session() as session:
     drawbot = session.drawbot()
@@ -20,5 +20,5 @@ with client.session() as session:
 
     system.evaluate(order=4)
 
-    if input("Submit? (Y/N)").lower().startswith("y"):
-        session.queue("example drawing")
+    if input("Submit? (Y/N) > ").lower().startswith("y"):
+        print(session.queue("example drawing"))
