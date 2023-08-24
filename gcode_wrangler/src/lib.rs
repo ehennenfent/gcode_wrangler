@@ -3,6 +3,8 @@ use serde::{Deserialize, Serialize};
 use std::ops::Add;
 
 pub mod models;
+mod shell;
+pub use shell::{PortCmd, SerialChannel};
 
 #[derive(Serialize, Clone)]
 pub enum Flavor {

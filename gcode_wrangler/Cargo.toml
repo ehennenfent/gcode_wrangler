@@ -2,6 +2,7 @@
 name = "gcode_wrangler"
 version = "0.1.0"
 edition = "2021"
+default-run = "server"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -10,8 +11,17 @@ axum = "0.6.19"
 config = "0.13.3"
 serde = { version = "1.0.173", features = ["derive"] }
 serde_json = "1.0.103"
+serialport = "4.2.2"
 tokio = { version = "1.29.1", features = ["macros", "rt-multi-thread"] }
 
 
 [lib]
 name = "gcode_wrangler"
+
+[[bin]]
+name = "server"
+path = "src/main.rs"
+
+[[bin]]
+name = "shell"
+path = "src/shell.rs"
