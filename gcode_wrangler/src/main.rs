@@ -50,7 +50,7 @@ async fn main() {
         machine_details: machine,
         movements: Default::default(),
         cached_gcode: Default::default(),
-        progress: progress,
+        progress,
         cmd_channel: cmd,
     };
 
@@ -104,10 +104,7 @@ async fn post_resume(State(state): State<AppState>) {
 
 async fn post_run(State(state): State<AppState>, Path(handle): Path<Handle>) -> StatusCode {
     let flavor = state.machine_details.flavor;
-    let program = match state.cached_gcode.lock().unwrap().get(&handle) {
-        Some(gcode) => Some(to_program(gcode, flavor)),
-        None => None,
-    };
+    let program = state.cached_gcode.lock().unwrap().get(&handle).map(|gcode| to_program(gcode, flavor));
 
     match program {
         Some(program) => match state.cmd_channel.send(PortCmd::SEND(program)).await {

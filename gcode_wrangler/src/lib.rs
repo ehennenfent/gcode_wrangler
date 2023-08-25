@@ -18,8 +18,8 @@ pub enum Flavor {
 }
 
 impl Flavor {
-    fn render(&self, operations: &Vec<GCode>) -> Vec<String> {
-        operations.into_iter().map(|op| op.render(self)).collect()
+    fn render(&self, operations: &[GCode]) -> Vec<String> {
+        operations.iter().map(|op| op.render(self)).collect()
     }
 }
 
@@ -59,7 +59,7 @@ pub struct Vec3 {
 }
 
 impl Vec3 {
-    fn to_string(&self) -> Result<String, &'static str> {
+    fn to_string(self) -> Result<String, &'static str> {
         match (self.x, self.y, self.z) {
             (None, None, None) => Err("At least one dimension must be provided"),
             (_, _, _) => {
@@ -385,7 +385,7 @@ impl SerialChannel {
                         progress: progress_tx,
                         command: cmd_rx,
                         status: PortCmd::WAIT,
-                        port: port,
+                        port,
                         buffer: Vec::new(),
                     },
                 ))
@@ -449,7 +449,7 @@ impl SerialChannel {
     }
 }
 
-pub fn to_program(gcode: &Vec<GCode>, flavor: Flavor) -> Vec<String> {
+pub fn to_program(gcode: &[GCode], flavor: Flavor) -> Vec<String> {
     let mut rendered: Vec<String> = vec![];
 
     rendered.extend(flavor.render(&GCode::preamble(&flavor)));
