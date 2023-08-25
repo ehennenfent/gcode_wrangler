@@ -1,6 +1,7 @@
 use models::{MachineDetails, Movement, Vec2D};
 use serde::{Deserialize, Serialize};
 use std::ops::Add;
+use std::{thread, time};
 
 use tokio::sync::mpsc::{Receiver as SingleReceiver, Sender as MultiSender};
 use tokio::sync::watch::{Receiver, Sender};
@@ -229,7 +230,7 @@ impl GCode {
         }
     }
 
-    fn preamble(flavor: &Flavor) -> Vec<GCode> {
+    pub fn preamble(flavor: &Flavor) -> Vec<GCode> {
         match flavor {
             Flavor::GRBL => vec![
                 GCode::SetUnits(Units::Millimeters),
@@ -244,7 +245,7 @@ impl GCode {
         }
     }
 
-    fn footer(flavor: &Flavor) -> Vec<GCode> {
+    pub fn footer(flavor: &Flavor) -> Vec<GCode> {
         match flavor {
             Flavor::GRBL => vec![
                 GCode::Deactivate,
@@ -298,6 +299,9 @@ impl Add<Vec3> for Vec3 {
 }
 
 pub fn to_gcode(movements: &Vec<Movement>, position_mode: Position) -> Vec<GCode> {
+    // accepts either position mode, but always produces absolute coordinates based on
+    // starting at (0, 0).
+
     let mut active: bool = false;
     let mut position = Vec3 {
         x: Some(0.0),
@@ -350,7 +354,8 @@ pub fn to_gcode(movements: &Vec<Movement>, position_mode: Position) -> Vec<GCode
 
 pub enum PortCmd {
     WAIT,
-    RUN(Vec<String>),
+    SEND(Vec<String>),
+    RUN,
     PAUSE,
     STOP,
 }
@@ -388,21 +393,29 @@ impl SerialChannel {
     }
 
     pub fn run(&mut self) {
+        // we're not gonna need to send gcode at more than 30fps, so we can just make
+        // this thread sleep most of the time rather than futz about with async
+        let thread_delay = time::Duration::from_millis(35);
+
         loop {
             match self.command.try_recv() {
-                Ok(cmd) => {
-                    match &cmd {
-                        PortCmd::WAIT => {
-                            self.buffer.clear();
-                        }
-                        PortCmd::RUN(cmds) => {
-                            self.buffer.extend(cmds.iter().rev().cloned());
-                        }
-                        PortCmd::PAUSE => (),
-                        PortCmd::STOP => break,
+                Ok(cmd) => match &cmd {
+                    PortCmd::WAIT => {
+                        self.buffer.clear();
+                        self.status = PortCmd::WAIT;
                     }
-                    self.status = cmd;
-                }
+                    PortCmd::SEND(cmds) => {
+                        self.buffer.clear();
+                        self.buffer.extend(cmds.iter().rev().cloned());
+                    }
+                    PortCmd::PAUSE => self.status = PortCmd::PAUSE,
+                    PortCmd::STOP => {
+                        self.buffer.clear();
+                        self.status = PortCmd::STOP;
+                        break;
+                    }
+                    PortCmd::RUN => self.status = PortCmd::RUN,
+                },
                 Err(mpsc::error::TryRecvError::Disconnected) => {
                     panic!("Command channel closed unexpectedly")
                 }
@@ -413,21 +426,33 @@ impl SerialChannel {
                 PortCmd::STOP => break,
                 PortCmd::PAUSE => (),
                 PortCmd::WAIT => (),
-                PortCmd::RUN(full) => match self.buffer.pop() {
+                PortCmd::RUN => match self.buffer.pop() {
                     Some(next_cmd) => {
                         if let Err(e) = self.port.write_all(format!("{}\n", next_cmd).as_bytes()) {
                             println!("Failed to write to serial port: {:?}", e);
                             self.status = PortCmd::WAIT
                         } else {
                             self.progress
-                                .send(full.len() - self.buffer.len())
+                                .send(self.buffer.len())
                                 .expect("Progress channel closed unexpectedly")
                         }
                     }
                     None => self.status = PortCmd::WAIT,
                 },
+                PortCmd::SEND(_) => (),
             }
+            thread::sleep(thread_delay);
         }
         println!("Serial monitor exiting");
     }
+}
+
+pub fn to_program(gcode: &Vec<GCode>, flavor: Flavor) -> Vec<String> {
+    let mut rendered: Vec<String> = vec![];
+
+    rendered.extend(flavor.render(&GCode::preamble(&flavor)));
+    rendered.extend(flavor.render(gcode));
+    rendered.extend(flavor.render(&GCode::footer(&flavor)));
+
+    rendered
 }

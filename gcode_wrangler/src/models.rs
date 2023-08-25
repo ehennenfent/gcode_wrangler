@@ -26,9 +26,9 @@ pub struct Movement {
 
 #[derive(Clone, Serialize)]
 pub struct MachineDetails {
-    dimensions: Vec2D,
-    flavor: Flavor,
-    device: String,
+    pub dimensions: Vec2D,
+    pub flavor: Flavor,
+    pub device: String,
     pub port: String,
     pub baud_rate: u32,
 }
