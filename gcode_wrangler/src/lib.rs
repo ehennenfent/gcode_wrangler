@@ -224,6 +224,20 @@ impl GCode {
             }
         }
     }
+
+    fn preamble(flavor: &Flavor) -> Vec<GCode> {
+        match flavor {
+            Flavor::GRBL => vec![GCode::SetUnits(Units::Millimeters), GCode::SetPositionMode(Position::Absolute), GCode::SetCurrentPosition(Vec3{x: Some(0.0), y: Some(0.0), z: Some(0.0)})],
+            Flavor::Marlin => todo!(),
+        }
+    }
+
+    fn footer(flavor: &Flavor) -> Vec<GCode> {
+        match flavor {
+            Flavor::GRBL => vec![GCode::Deactivate, GCode::LinearMove { target: Vec3 { x: Some(0.0), y: Some(0.0), z: None }, feedrate: None }, GCode::EndProgram ],
+            Flavor::Marlin => todo!(),
+        }
+    }
 }
 
 impl From<Vec2D> for Vec3 {
