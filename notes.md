@@ -16,16 +16,16 @@
 ## GCode Host:
 - [x] Read machine details from config
 - [x] GCode type system
-- [ ] Serial port communicator
-    - [ ] GCode Sending
-    - [ ] Pausing
-- [ ] Convert uploaded movements into GCode
+- [x] Serial port communicator
+    - [x] GCode Sending
+    - [x] Pausing
+- [x] Convert uploaded movements into GCode
 - [ ] Simulate move set
 - [ ] HTTP Endpoints:
     - [x] Send Gcode
-    - [ ] Run Gcode
-    - [ ] Pause
+    - [x] Run Gcode
+    - [x] Pause
     - [ ] Start simulation
     - [ ] Get simulation results
-    - [ ] Get status
-    - [ ] Get machine details
+    - [x] Get status
+    - [x] Get machine details
