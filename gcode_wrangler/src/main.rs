@@ -2,10 +2,13 @@ use axum::{extract::Json, extract::Path, extract::State, routing::get, routing::
 
 use config::Config;
 use gcode_wrangler::models::{MachineDetails, Movement};
-use gcode_wrangler::{GCode, Position, to_gcode};
+use gcode_wrangler::{to_gcode, GCode, PortCmd, Position, SerialChannel};
 use std::collections::hash_map::{DefaultHasher, HashMap};
 use std::hash::{Hash, Hasher};
 use std::sync::{Arc, Mutex};
+use std::thread;
+use tokio::sync::mpsc::Sender;
+use tokio::sync::watch::Receiver;
 
 type Handle = u64;
 
@@ -14,6 +17,8 @@ pub struct AppState {
     movements: Arc<Mutex<HashMap<Handle, Vec<Movement>>>>,
     cached_gcode: Arc<Mutex<HashMap<Handle, Vec<GCode>>>>,
     machine_details: MachineDetails,
+    progress: Receiver<usize>,
+    cmd_channel: Sender<PortCmd>,
 }
 
 #[tokio::main]
@@ -29,11 +34,26 @@ async fn main() {
         .unwrap()
         .into();
 
+    let maybe_channel: Result<
+        (
+            tokio::sync::watch::Receiver<usize>,
+            Sender<PortCmd>,
+            SerialChannel,
+        ),
+        serialport::Error,
+    > = SerialChannel::new(&machine);
+
+    let (progress, cmd, mut channel) = maybe_channel.expect("failed to open serial port");
+
     let state = AppState {
         machine_details: machine,
         movements: Default::default(),
         cached_gcode: Default::default(),
+        progress: progress,
+        cmd_channel: cmd,
     };
+
+    thread::spawn(move || channel.run());
 
     let app = Router::new()
         .route("/run", get(get_run).post(post_run))
@@ -61,28 +81,23 @@ async fn post_movements(
     let mut s = DefaultHasher::new();
     movements.hash(&mut s);
     let hash = s.finish();
-    state
-        .movements
-        .lock()
-        .unwrap()
-        .insert(hash, movements);
+    state.movements.lock().unwrap().insert(hash, movements);
     hash.to_string()
 }
 
-async fn post_pause(Path(handle): Path<Handle>) {}
+async fn post_pause(State(state): State<AppState>) {
+    state.cmd_channel.send(PortCmd::PAUSE).await.unwrap();
+}
+
 async fn post_run(Path(handle): Path<Handle>) {}
-async fn get_run(Path(handle): Path<Handle>) {}
-async fn get_analysis(
-    State(state): State<AppState>,
-    Path(handle): Path<Handle>) {
+
+async fn get_run(State(state): State<AppState>) {}
+
+async fn get_analysis(State(state): State<AppState>, Path(handle): Path<Handle>) {
     let rendered: Vec<GCode> = match state.movements.lock().unwrap().get(&handle) {
         Some(movements) => to_gcode(movements, Position::Relative),
         None => todo!(),
     };
 
-    state
-    .cached_gcode
-    .lock()
-    .unwrap()
-    .insert(handle, rendered);
+    state.cached_gcode.lock().unwrap().insert(handle, rendered);
 }

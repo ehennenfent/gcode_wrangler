@@ -29,6 +29,8 @@ pub struct MachineDetails {
     dimensions: Vec2D,
     flavor: Flavor,
     device: String,
+    pub port: String,
+    pub baud_rate: u32,
 }
 
 impl From<HashMap<String, String>> for MachineDetails {
@@ -63,6 +65,15 @@ impl From<HashMap<String, String>> for MachineDetails {
                 .get("name")
                 .expect("Missing config value: name")
                 .to_owned(),
+            port: fromval
+                .get("port")
+                .expect("Missing config value: port")
+                .to_owned(),
+            baud_rate: fromval
+                .get("baud_rate")
+                .expect("Missing config calue: baud_rate")
+                .parse()
+                .unwrap(),
         }
     }
 }

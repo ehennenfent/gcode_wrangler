@@ -2,9 +2,13 @@ use models::{MachineDetails, Movement, Vec2D};
 use serde::{Deserialize, Serialize};
 use std::ops::Add;
 
+use tokio::sync::mpsc::{Receiver as SingleReceiver, Sender as MultiSender};
+use tokio::sync::watch::{Receiver, Sender};
+use tokio::sync::{mpsc, watch};
+
+use serialport::{available_ports, Error, SerialPort, SerialPortType};
+
 pub mod models;
-mod shell;
-pub use shell::{PortCmd, SerialChannel};
 
 #[derive(Serialize, Clone)]
 pub enum Flavor {
@@ -227,14 +231,33 @@ impl GCode {
 
     fn preamble(flavor: &Flavor) -> Vec<GCode> {
         match flavor {
-            Flavor::GRBL => vec![GCode::SetUnits(Units::Millimeters), GCode::SetPositionMode(Position::Absolute), GCode::SetCurrentPosition(Vec3{x: Some(0.0), y: Some(0.0), z: Some(0.0)})],
+            Flavor::GRBL => vec![
+                GCode::SetUnits(Units::Millimeters),
+                GCode::SetPositionMode(Position::Absolute),
+                GCode::SetCurrentPosition(Vec3 {
+                    x: Some(0.0),
+                    y: Some(0.0),
+                    z: Some(0.0),
+                }),
+            ],
             Flavor::Marlin => todo!(),
         }
     }
 
     fn footer(flavor: &Flavor) -> Vec<GCode> {
         match flavor {
-            Flavor::GRBL => vec![GCode::Deactivate, GCode::LinearMove { target: Vec3 { x: Some(0.0), y: Some(0.0), z: None }, feedrate: None }, GCode::EndProgram ],
+            Flavor::GRBL => vec![
+                GCode::Deactivate,
+                GCode::LinearMove {
+                    target: Vec3 {
+                        x: Some(0.0),
+                        y: Some(0.0),
+                        z: None,
+                    },
+                    feedrate: None,
+                },
+                GCode::EndProgram,
+            ],
             Flavor::Marlin => todo!(),
         }
     }
@@ -323,4 +346,88 @@ pub fn to_gcode(movements: &Vec<Movement>, position_mode: Position) -> Vec<GCode
     }
 
     as_gcode
+}
+
+pub enum PortCmd {
+    WAIT,
+    RUN(Vec<String>),
+    PAUSE,
+    STOP,
+}
+
+pub struct SerialChannel {
+    progress: Sender<usize>,
+    command: SingleReceiver<PortCmd>,
+    status: PortCmd,
+    port: Box<dyn SerialPort>,
+    buffer: Vec<String>,
+}
+
+impl SerialChannel {
+    pub fn new(
+        machine: &MachineDetails,
+    ) -> Result<(Receiver<usize>, MultiSender<PortCmd>, Self), Error> {
+        match serialport::new(machine.port.clone(), machine.baud_rate).open() {
+            Ok(port) => {
+                let (cmd_tx, cmd_rx) = mpsc::channel(64);
+                let (progress_tx, progress_rx) = watch::channel(0usize);
+                Ok((
+                    progress_rx,
+                    cmd_tx,
+                    SerialChannel {
+                        progress: progress_tx,
+                        command: cmd_rx,
+                        status: PortCmd::WAIT,
+                        port: port,
+                        buffer: Vec::new(),
+                    },
+                ))
+            }
+            Err(e) => Err(e),
+        }
+    }
+
+    pub fn run(&mut self) {
+        loop {
+            match self.command.try_recv() {
+                Ok(cmd) => {
+                    match &cmd {
+                        PortCmd::WAIT => {
+                            self.buffer.clear();
+                        }
+                        PortCmd::RUN(cmds) => {
+                            self.buffer.extend(cmds.iter().rev().cloned());
+                        }
+                        PortCmd::PAUSE => (),
+                        PortCmd::STOP => break,
+                    }
+                    self.status = cmd;
+                }
+                Err(mpsc::error::TryRecvError::Disconnected) => {
+                    panic!("Command channel closed unexpectedly")
+                }
+                Err(mpsc::error::TryRecvError::Empty) => (),
+            }
+
+            match &self.status {
+                PortCmd::STOP => break,
+                PortCmd::PAUSE => (),
+                PortCmd::WAIT => (),
+                PortCmd::RUN(full) => match self.buffer.pop() {
+                    Some(next_cmd) => {
+                        if let Err(e) = self.port.write_all(format!("{}\n", next_cmd).as_bytes()) {
+                            println!("Failed to write to serial port: {:?}", e);
+                            self.status = PortCmd::WAIT
+                        } else {
+                            self.progress
+                                .send(full.len() - self.buffer.len())
+                                .expect("Progress channel closed unexpectedly")
+                        }
+                    }
+                    None => self.status = PortCmd::WAIT,
+                },
+            }
+        }
+        println!("Serial monitor exiting");
+    }
 }
