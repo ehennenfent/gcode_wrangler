@@ -123,8 +123,8 @@ async fn get_run(State(state): State<AppState>) -> Json<usize> {
 }
 
 async fn get_analysis(State(state): State<AppState>, Path(handle): Path<Handle>) {
-    let rendered: Vec<GCode> = match state.movements.lock().unwrap().get(&handle) {
-        Some(movements) => todo!(),
+    let _rendered: Vec<GCode> = match state.movements.lock().unwrap().get(&handle) {
+        Some(_movements) => todo!(),
         None => todo!(),
     };
 }

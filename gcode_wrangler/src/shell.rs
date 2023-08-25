@@ -1,12 +1,11 @@
-use serialport::{available_ports, Error, SerialPort, SerialPortType};
+use serialport::{Error, SerialPort};
 
-use core::time;
 use std::thread;
 use tokio::sync::mpsc;
 use tokio::sync::mpsc::{Receiver, Sender};
 
 use std::io;
-use std::io::{BufRead, BufReader};
+use std::io::BufRead;
 
 pub enum PortCmd {
     RUN,
@@ -15,7 +14,7 @@ pub enum PortCmd {
 }
 
 pub struct SerialChannel {
-    sender: Sender<String>,
+    _sender: Sender<String>,
     receiver: Receiver<String>,
     command: Receiver<PortCmd>,
     status: PortCmd,
@@ -38,7 +37,7 @@ impl SerialChannel {
                     outbound_rx,
                     cmd_tx,
                     SerialChannel {
-                        sender: outbound_tx,
+                        _sender: outbound_tx,
                         receiver: inbound_rx,
                         command: cmd_rx,
                         status: PortCmd::RUN,

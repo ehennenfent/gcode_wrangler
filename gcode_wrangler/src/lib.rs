@@ -1,5 +1,5 @@
 use models::{MachineDetails, Movement, Vec2D};
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use std::ops::Add;
 use std::{thread, time};
 
@@ -7,7 +7,7 @@ use tokio::sync::mpsc::{Receiver as SingleReceiver, Sender as MultiSender};
 use tokio::sync::watch::{Receiver, Sender};
 use tokio::sync::{mpsc, watch};
 
-use serialport::{available_ports, Error, SerialPort, SerialPortType};
+use serialport::{Error, SerialPort};
 
 pub mod models;
 
@@ -41,15 +41,15 @@ pub enum StepperState {
     Disabled,
 }
 
-pub struct SimulationState {
-    real_position: Vec3,
-    virtual_position: Vec3,
-    max_travel: Vec3,
-    min_travel: Vec3,
-    positioning: Position,
-    feedrate: u32,
-    active: bool,
-}
+// pub struct SimulationState {
+//     real_position: Vec3,
+//     virtual_position: Vec3,
+//     max_travel: Vec3,
+//     min_travel: Vec3,
+//     positioning: Position,
+//     feedrate: u32,
+//     active: bool,
+// }
 
 #[derive(Debug, Clone, Copy)]
 pub struct Vec3 {
@@ -347,6 +347,8 @@ pub fn to_gcode(movements: &Vec<Movement>, position_mode: Position) -> Vec<GCode
                 });
             }
         }
+
+        position = dest;
     }
 
     as_gcode

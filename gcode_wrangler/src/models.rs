@@ -1,7 +1,6 @@
 use serde::{Deserialize, Serialize};
-use std::collections::hash_map::{DefaultHasher, HashMap};
+use std::collections::hash_map::HashMap;
 use std::hash::{Hash, Hasher};
-use std::sync::{Arc, Mutex};
 
 use crate::Flavor;
 
