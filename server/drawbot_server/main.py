@@ -69,11 +69,13 @@ async def pause(response: Response):
     GcodeClient().pause()
     return {}
 
+
 @app.post("/cancel")
-async def pause(response: Response):
+async def cancel(response: Response):
     response.headers["HX-Trigger"] = "cancel_job"
     GcodeClient().cancel()
     return {}
+
 
 @app.post("/submit")
 async def post_job(new_job: PostedJob, background_tasks: BackgroundTasks):

@@ -1,7 +1,6 @@
 use models::{MachineDetails, Movement, Vec2D};
 use serde::Serialize;
 use std::ops::{Add, Sub};
-use std::time::Duration;
 use std::{thread, time};
 
 use tokio::sync::mpsc::{Receiver as SingleReceiver, Sender as MultiSender};
@@ -435,7 +434,7 @@ impl SerialChannel {
                     }
                     PortCmd::RUN => self.status = PortCmd::RUN,
                     PortCmd::CANCEL => {
-                        self.port.write(b"!").expect("Failed to send halt command");
+                        self.port.write_all(b"!").expect("Failed to send halt command");
                         self.status = PortCmd::CANCEL;
                     }
                 },
