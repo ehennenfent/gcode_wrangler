@@ -22,7 +22,7 @@
         <div id="leftpane" class="flexv hcenter">
             <div hx-get="/primary_job" hx-trigger="load, next_job from:body, sse:new_job, every 15s"></div>
             <div id="control_panel" class="flexh hcenter">
-                <button hx-post="/pause" hx-swap="none">Pause</button>
+                <button hx-post="/cancel" hx-swap="none">Cancel</button>
                 <button hx-post="/run_current" hx-swap="none">Go</button>
                 <button hx-post="/next" hx-swap="none">Next</button>
             </div>

@@ -43,7 +43,7 @@ class GcodeClient:
 
     def cancel(self):
         print("Stopping...")
-        return self._post_endpoint("stop")
+        return self._post_endpoint("cancel")
 
     def get_machine(self):
         details = self._get_endpoint("machine").json()

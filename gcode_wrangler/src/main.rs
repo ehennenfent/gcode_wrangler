@@ -70,8 +70,7 @@ async fn main() {
 
     thread::spawn(move || channel.run());
 
-    tracing_subscriber::fmt()
-        .init();
+    tracing_subscriber::fmt().init();
 
     let app = Router::new()
         .route("/run/:handle", get(get_run).post(post_run))
@@ -79,6 +78,7 @@ async fn main() {
         .route("/movements", post(post_movements))
         .route("/pause", post(post_pause))
         .route("/resume", post(post_resume))
+        .route("/cancel", post(post_cancel))
         .route("/machine", get(get_machine))
         .layer(
             TraceLayer::new_for_http()
@@ -134,6 +134,10 @@ async fn post_pause(State(state): State<AppState>) {
 
 async fn post_resume(State(state): State<AppState>) {
     state.cmd_channel.send(PortCmd::RUN).await.unwrap();
+}
+
+async fn post_cancel(State(state): State<AppState>) {
+    state.cmd_channel.send(PortCmd::CANCEL).await.unwrap();
 }
 
 async fn post_run(State(state): State<AppState>, Path(handle): Path<Handle>) -> StatusCode {

@@ -64,17 +64,17 @@ impl Vec3 {
         // match (self.x, self.y, self.z) {
         //     (None, None, None) => Err("At least one dimension must be provided"),
         //     (_, _, _) => {
-                let mut parts: Vec<String> = Vec::new();
-                if let Some(x) = self.x {
-                    parts.push(format!("X{}", x))
-                }
-                if let Some(y) = self.y {
-                    parts.push(format!("Y{}", y))
-                }
-                if let Some(z) = self.z {
-                    parts.push(format!("Z{}", z))
-                }
-                Ok(parts.join(" "))
+        let mut parts: Vec<String> = Vec::new();
+        if let Some(x) = self.x {
+            parts.push(format!("X{}", x))
+        }
+        if let Some(y) = self.y {
+            parts.push(format!("Y{}", y))
+        }
+        if let Some(z) = self.z {
+            parts.push(format!("Z{}", z))
+        }
+        Ok(parts.join(" "))
         //     }
         // }
     }
@@ -195,7 +195,7 @@ impl GCode {
             },
             GCode::SetXY => "G17".to_string(),
             GCode::Pause(ms) => {
-                format!("G4 P{}",  (*ms as f32) / 1000.0)
+                format!("G4 P{}", (*ms as f32) / 1000.0)
             }
             GCode::SetPositionMode(pmode) => match pmode {
                 Position::Absolute => "G90",
@@ -371,6 +371,7 @@ pub enum PortCmd {
     RUN,
     PAUSE,
     STOP,
+    CANCEL,
 }
 
 pub struct SerialChannel {
@@ -420,9 +421,7 @@ impl SerialChannel {
         loop {
             match self.command.try_recv() {
                 Ok(cmd) => match &cmd {
-                    PortCmd::WAIT => {
-                        self.reset()
-                    }
+                    PortCmd::WAIT => self.reset(),
                     PortCmd::SEND(cmds) => {
                         self.buffer.clear();
                         self.buffer.extend(cmds.iter().rev().cloned());
@@ -435,6 +434,10 @@ impl SerialChannel {
                         break;
                     }
                     PortCmd::RUN => self.status = PortCmd::RUN,
+                    PortCmd::CANCEL => {
+                        self.port.write(b"!").expect("Failed to send halt command");
+                        self.status = PortCmd::CANCEL;
+                    }
                 },
                 Err(mpsc::error::TryRecvError::Disconnected) => {
                     panic!("Command channel closed unexpectedly")
@@ -446,6 +449,7 @@ impl SerialChannel {
                 PortCmd::STOP => break,
                 PortCmd::PAUSE => (),
                 PortCmd::WAIT => (),
+                PortCmd::CANCEL => (),
                 PortCmd::RUN => match self.buffer.pop() {
                     Some(next_cmd) => {
                         println!("> {}", next_cmd);
@@ -453,7 +457,7 @@ impl SerialChannel {
                             println!("Failed to write to serial port: {:?}", e);
                             self.status = PortCmd::PAUSE
                         } else {
-                            for attempt in (0..600){
+                            for attempt in 0..600 {
                                 match self.port.bytes_to_read() {
                                     Ok(0) => (),
                                     Ok(n) => {
@@ -461,7 +465,8 @@ impl SerialChannel {
                                         self.port.read_exact(&mut buffer).unwrap();
                                         let as_string = String::from_utf8_lossy(&buffer);
                                         println!("{}", as_string);
-                                        if as_string.contains("ok") { // oh god this is horrible
+                                        if as_string.contains("ok") {
+                                            // oh god this is horrible
                                             break;
                                         }
                                     }
