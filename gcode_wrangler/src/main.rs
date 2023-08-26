@@ -1,17 +1,24 @@
-use axum::http::StatusCode;
+use axum::http::{header, StatusCode};
 use axum::{extract::Json, extract::Path, extract::State, routing::get, routing::post, Router};
 
 use config::Config;
 use gcode_wrangler::models::{MachineDetails, Movement};
 use gcode_wrangler::{to_gcode, to_program, GCode, PortCmd, Position, SerialChannel};
+use image::{ImageOutputFormat, Rgba, RgbaImage};
+use imageproc::drawing::{draw_line_segment_mut, Blend};
 use std::collections::hash_map::{DefaultHasher, HashMap};
 use std::hash::{Hash, Hasher};
+use std::io::Cursor;
 use std::sync::{Arc, Mutex};
 use std::thread;
 use tokio::sync::mpsc::Sender;
 use tokio::sync::watch::Receiver;
 
 type Handle = u64;
+
+const IMAGE_SCALE: f32 = 4.0;
+const DRAW_COLOR: Rgba<u8> = Rgba([0u8, 0u8, 0u8, 255u8]);
+const MOVE_COLOR: Rgba<u8> = Rgba([235u8, 197u8, 103u8, 255u8]);
 
 #[derive(Clone)]
 pub struct AppState {
@@ -104,7 +111,12 @@ async fn post_resume(State(state): State<AppState>) {
 
 async fn post_run(State(state): State<AppState>, Path(handle): Path<Handle>) -> StatusCode {
     let flavor = state.machine_details.flavor;
-    let program = state.cached_gcode.lock().unwrap().get(&handle).map(|gcode| to_program(gcode, flavor));
+    let program = state
+        .cached_gcode
+        .lock()
+        .unwrap()
+        .get(&handle)
+        .map(|gcode| to_program(gcode, flavor));
 
     match program {
         Some(program) => match state.cmd_channel.send(PortCmd::SEND(program)).await {
@@ -119,9 +131,57 @@ async fn get_run(State(state): State<AppState>) -> Json<usize> {
     axum::Json(*state.progress.borrow())
 }
 
-async fn get_analysis(State(state): State<AppState>, Path(handle): Path<Handle>) {
-    let _rendered: Vec<GCode> = match state.movements.lock().unwrap().get(&handle) {
-        Some(_movements) => todo!(),
-        None => todo!(),
+async fn get_analysis(
+    State(state): State<AppState>,
+    Path(handle): Path<Handle>,
+) -> impl axum::response::IntoResponse {
+    let dimensions = state.machine_details.dimensions;
+    match state.movements.lock().unwrap().get(&handle) {
+        Some(movements) => {
+            let image = RgbaImage::new(
+                (dimensions.x * IMAGE_SCALE) as u32,
+                (dimensions.y * IMAGE_SCALE) as u32,
+            );
+            let mut canvas = Blend(image);
+
+            let mut start_position = (0.0, 0.0);
+
+            for movement in movements.iter() {
+                let dest = (
+                    start_position.0 + (movement.dest.x * IMAGE_SCALE),
+                    start_position.1 + (movement.dest.y * IMAGE_SCALE),
+                );
+
+                draw_line_segment_mut(
+                    &mut canvas,
+                    start_position,
+                    dest,
+                    if movement.pen_down {
+                        DRAW_COLOR
+                    } else {
+                        MOVE_COLOR
+                    },
+                );
+
+                start_position = dest;
+            }
+
+            let buf: Vec<u8> = Vec::new();
+            let mut bytes: Cursor<Vec<u8>> = Cursor::new(buf);
+            canvas
+                .0
+                .write_to(&mut bytes, ImageOutputFormat::Png)
+                .expect("Failed to save canvas bytes");
+            (
+                StatusCode::OK,
+                (header::CONTENT_TYPE, "image/png"),
+                bytes.into_inner(),
+            )
+        }
+        None => (
+            StatusCode::NOT_FOUND,
+            (header::CONTENT_TYPE, "image/png"),
+            vec![],
+        ),
     };
 }
