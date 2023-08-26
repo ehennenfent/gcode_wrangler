@@ -46,18 +46,35 @@ class GcodeJob(PostedJob):
     def run(self) -> None:
         client: GcodeClient = GcodeClient()
 
+        if self.status == Status.RECEIVED:
+            print("Movements weren't analyzed... Retrying...")
+            self.analyze()
+
         assert self.status == Status.READY
         assert self.handle is not None
 
-        client.start_run(self.handle)
+        response = client.start_run(self.handle)
+        if response is None:
+            print("Server seems to be offline! Run again later...")
+        else:
+            if response.status_code == 404:
+                print("No gcode found for this handle; did the server restart? Reuploading...")
+                self.analyze()
+                if client.start_run(self.handle) is None:
+                    print("Server seems to have crashed during analysis...")
 
     @classmethod
     def from_posted(cls, posted: PostedJob) -> "GcodeJob":
         return cls(comment=posted.comment, username=posted.username, movements=posted.movements)
 
-    def analyze(self, event_channel = None) -> None:
+    def analyze(self, event_channel=None) -> None:
+        self.status = Status.RECEIVED
+
         client = GcodeClient()
         self.handle = client.upload(self.movements)
+
+        if self.handle is None:
+            raise RuntimeError("Failed to upload movements to gcode server. We'll retry later...")
 
         with open(SERVER_DIR.joinpath("rendered").joinpath(f"{self.handle}.png"), "wb") as pngfile:
             pngfile.write(client.get_rendered(self.handle))

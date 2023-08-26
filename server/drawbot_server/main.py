@@ -1,5 +1,5 @@
-from functools import partial
 import typing as t
+from functools import partial
 from pathlib import Path
 
 from fastapi import BackgroundTasks, FastAPI, Request, Response
@@ -46,6 +46,7 @@ async def job_list(request: Request):
 @app.get("/progress", response_class=HTMLResponse)
 async def get_progress(request: Request):
     return templates.TemplateResponse("progress.html", {"request": request, "primary_job": primary_job})
+
 
 @app.get("/machine", response_class=HTMLResponse)
 async def get_machine_details(request: Request):

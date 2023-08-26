@@ -32,5 +32,5 @@
 
 - [x] Show machine details on frontend
 - [x] Show usernames on frontend
-- [ ] Be more resilient against server restarts
+- [x] Be more resilient against server restarts
 - [ ] Write Readme
