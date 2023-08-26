@@ -21,20 +21,34 @@ class GcodeClient:
     def start_run(self, handle: Handle):
         return self._post_endpoint(f"run/{handle}")
 
-    def get_run(self, handle: Handle):
-        return self._get_endpoint(f"run")
+    def get_progress(self, handle: Handle):
+        return self._get_endpoint(f"run/{handle}").json()
 
     def get_rendered(self, handle: Handle):
-        return self._get_endpoint(f"rendered/{handle}").raw
+        request = self._get_endpoint(f"rendered/{handle}", stream=True)
+        print("Got", len(request.content), "bytes")
+        print(request)
+        return request.raw
 
     def upload(self, movements: t.List["Movement"]) -> Handle:
-        return self._post_endpoint(f"movements")
+        print("Uploading", len(movements), "to server")
+        handle = self._post_endpoint(f"movements", json=[m.nested_dict() for m in movements]).text
+        print("-->", handle)
+        return handle
 
     def pause(self):
+        print("Pausing...")
         return self._post_endpoint(f"pause")
 
     def resume(self):
+        print("Resuming...")
         return self._post_endpoint(f"resume")
+    
+    def resume(self):
+        print("Stopping...")
+        return self._post_endpoint(f"stop")
 
     def get_machine(self):
-        return self._get_endpoint("machine")
+        details = self._get_endpoint("machine").json()
+        print("Got machine details:", details)
+        return details

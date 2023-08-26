@@ -1,3 +1,4 @@
+import shutil
 import typing as t
 from enum import Enum, auto
 from pathlib import Path
@@ -27,6 +28,12 @@ class Movement(BaseModel):
     dest: Vec2D
     pen_down: bool
 
+    def nested_dict(self):
+        return {
+            "dest": self.dest.dict(),
+            "pen_down": self.pen_down
+        }
+
 
 class PostedJob(BaseModel):
     username: str = ""
@@ -53,9 +60,13 @@ class GcodeJob(PostedJob):
 
         # Monitor progress
         self.progress = 0
-        for _ in range(100):
-            # self.progress = client.get_run(self.handle)
-            self.progress += 1
+        sleep(1)
+        starting_progress = client.get_progress(self.handle)
+        current_progress = starting_progress
+
+        while current_progress > 0:
+            current_progress = client.get_progress(self.handle)
+            self.progress = int(((starting_progress - current_progress) / starting_progress) * 100)
             sleep(1)
 
         # Reset upon completion
@@ -71,7 +82,7 @@ class GcodeJob(PostedJob):
         self.handle = client.upload(self.movements)
 
         with open(SERVER_DIR.joinpath("rendered").joinpath(f"{self.handle}.png"), "wb") as pngfile:
-            pngfile.write(client.get_rendered(self.handle))
+            shutil.copyfileobj(client.get_rendered(self.handle), pngfile)
 
-        self.image_path = f"/rendered/{self.handle}"
+        self.image_path = f"/rendered/{self.handle}.png"
         self.status = Status.READY

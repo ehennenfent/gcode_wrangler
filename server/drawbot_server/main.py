@@ -8,6 +8,7 @@ from fastapi.templating import Jinja2Templates
 from sse_starlette.sse import EventSourceResponse
 
 from .models import GcodeJob, PostedJob
+from .client import GcodeClient
 from .sse_channels import QueueManager
 
 SERVER_DIR = Path(__file__).parent.parent
@@ -59,6 +60,12 @@ async def next_job(response: Response):
     global primary_job
     response.headers["HX-Trigger"] = "next_job"
     primary_job = all_jobs.pop(0)
+    return {}
+
+@app.post("/pause")
+async def next_job(response: Response):
+    response.headers["HX-Trigger"] = "pause_job"
+    GcodeClient().pause()
     return {}
 
 

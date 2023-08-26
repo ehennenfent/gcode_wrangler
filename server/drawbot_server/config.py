@@ -4,4 +4,4 @@
 #     data = tomllib.load(f)
 
 # # we'll fix it in post
-drawbot_host = "calliope"  # data.get("drawbot_host")
+drawbot_host = "calliope:3000"  # data.get("drawbot_host")
