@@ -17,10 +17,11 @@ Cargo.lock
 .vscode/
 .idea/
 
-# Pyo3
+#
 .env/
 gcode_wrangler/python/drawbot_control/__pycache__/
 gcode_wrangler/python/drawbot_control/*.so
 *.egg-info/
 .mypy_cache/
+.ruff_cache/
 *.pyc
