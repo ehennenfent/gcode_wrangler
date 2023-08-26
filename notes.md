@@ -20,12 +20,11 @@
     - [x] GCode Sending
     - [x] Pausing
 - [x] Convert uploaded movements into GCode
-- [ ] Simulate move set
-- [ ] HTTP Endpoints:
+- [x] Simulate move set
+- [x] HTTP Endpoints:
     - [x] Send Gcode
     - [x] Run Gcode
     - [x] Pause
-    - [ ] Start simulation
-    - [ ] Get simulation results
+    - [x] Get simulation results
     - [x] Get status
     - [x] Get machine details

@@ -3,7 +3,9 @@ use axum::{extract::Json, extract::Path, extract::State, routing::get, routing::
 
 use config::Config;
 use gcode_wrangler::models::{MachineDetails, Movement};
-use gcode_wrangler::{to_gcode, to_program, GCode, PortCmd, Position, SerialChannel};
+use gcode_wrangler::{
+    clamp_movements, to_gcode, to_program, GCode, PortCmd, Position, SerialChannel,
+};
 use image::{ImageOutputFormat, Rgba, RgbaImage};
 use imageproc::drawing::{draw_line_segment_mut, Blend};
 use std::collections::hash_map::{DefaultHasher, HashMap};
@@ -65,7 +67,7 @@ async fn main() {
 
     let app = Router::new()
         .route("/run", get(get_run).post(post_run))
-        .route("/analysis", get(get_analysis))
+        .route("/rendered", get(get_analysis))
         .route("/movements", post(post_movements))
         .route("/pause", post(post_pause))
         .route("/resume", post(post_resume))
@@ -96,7 +98,14 @@ async fn post_movements(
         .lock()
         .unwrap()
         .insert(hash, to_gcode(&movements, Position::Relative));
-    state.movements.lock().unwrap().insert(hash, movements);
+    state.movements.lock().unwrap().insert(
+        hash,
+        clamp_movements(
+            movements,
+            state.machine_details.dimensions,
+            Position::Relative,
+        ),
+    );
 
     hash.to_string()
 }

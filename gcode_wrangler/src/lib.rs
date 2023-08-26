@@ -1,6 +1,6 @@
 use models::{MachineDetails, Movement, Vec2D};
 use serde::Serialize;
-use std::ops::Add;
+use std::ops::{Add, Sub};
 use std::{thread, time};
 
 use tokio::sync::mpsc::{Receiver as SingleReceiver, Sender as MultiSender};
@@ -457,4 +457,63 @@ pub fn to_program(gcode: &[GCode], flavor: Flavor) -> Vec<String> {
     rendered.extend(flavor.render(&GCode::footer(&flavor)));
 
     rendered
+}
+
+impl Add<Vec2D> for Vec2D {
+    type Output = Vec2D;
+
+    fn add(self, rhs: Vec2D) -> Self::Output {
+        Vec2D {
+            x: self.x + rhs.x,
+            y: self.y + rhs.y,
+        }
+    }
+}
+
+impl Sub<Vec2D> for Vec2D {
+    type Output = Vec2D;
+
+    fn sub(self, rhs: Vec2D) -> Self::Output {
+        Vec2D {
+            x: self.x - rhs.x,
+            y: self.y - rhs.y,
+        }
+    }
+}
+
+pub fn clamp_movements(
+    movements: Vec<Movement>,
+    dimensions: Vec2D,
+    mode: Position,
+) -> Vec<Movement> {
+    let mut new_movements = Vec::new();
+
+    let mut position = Vec2D::default();
+
+    for mv in movements {
+        let dest = match mode {
+            Position::Absolute => mv.dest,
+            Position::Relative => position + mv.dest,
+        };
+
+        let clamped = Vec2D {
+            x: f32::min(f32::max(0.0, dest.x), dimensions.x),
+            y: f32::min(f32::max(0.0, dest.y), dimensions.y),
+        };
+
+        match mode {
+            Position::Absolute => new_movements.push(Movement {
+                dest: clamped,
+                pen_down: mv.pen_down,
+            }),
+            Position::Relative => new_movements.push(Movement {
+                dest: clamped - position,
+                pen_down: mv.pen_down,
+            }),
+        }
+
+        position = clamped;
+    }
+
+    new_movements
 }
