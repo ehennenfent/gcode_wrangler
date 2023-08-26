@@ -1,4 +1,11 @@
+
+{% if primary_job %}
 <div id="gcode_preview">
     <img class="primary-image" src="{{primary_job.image_path}}">
 </div>
+{% else %}
+<div id="nothing_here">
+    There's nothing here yet. Go to <a href="https://github.com/ehennenfent/gcode_wrangler">github.com/ehennenfent/gcode_wrangler</a> to get started. 
+</div>
+{% endif %}
 <div hx-get="/progress", hx-trigger="load, start_job from:body"></div>
