@@ -28,10 +28,7 @@ class Movement(BaseModel):
     pen_down: bool
 
     def nested_dict(self):
-        return {
-            "dest": self.dest.dict(),
-            "pen_down": self.pen_down
-        }
+        return {"dest": self.dest.dict(), "pen_down": self.pen_down}
 
 
 class PostedJob(BaseModel):

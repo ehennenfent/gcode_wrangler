@@ -1,5 +1,4 @@
 import typing as t
-from urllib.parse import urljoin
 
 import requests
 
@@ -30,21 +29,21 @@ class GcodeClient:
 
     def upload(self, movements: t.List["Movement"]) -> Handle:
         print("Uploading", len(movements), "to server")
-        handle = self._post_endpoint(f"movements", json=[m.nested_dict() for m in movements]).text
+        handle = self._post_endpoint("movements", json=[m.nested_dict() for m in movements]).text
         print("-->", handle)
         return handle
 
     def pause(self):
         print("Pausing...")
-        return self._post_endpoint(f"pause")
+        return self._post_endpoint("pause")
 
     def resume(self):
         print("Resuming...")
-        return self._post_endpoint(f"resume")
-    
+        return self._post_endpoint("resume")
+
     def cancel(self):
         print("Stopping...")
-        return self._post_endpoint(f"stop")
+        return self._post_endpoint("stop")
 
     def get_machine(self):
         details = self._get_endpoint("machine").json()
