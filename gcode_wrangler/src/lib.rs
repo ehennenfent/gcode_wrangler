@@ -235,6 +235,15 @@ impl GCode {
             Flavor::GRBL => vec![
                 GCode::SetUnits(Units::Millimeters),
                 GCode::SetPositionMode(Position::Absolute),
+                GCode::Deactivate,
+                GCode::LinearMove {
+                    target: Vec3 {
+                        x: Some(0.0),
+                        y: Some(0.0),
+                        z: None,
+                    },
+                    feedrate: None,
+                },
                 GCode::SetCurrentPosition(Vec3 {
                     x: Some(0.0),
                     y: Some(0.0),
