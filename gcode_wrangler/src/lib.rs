@@ -412,9 +412,8 @@ impl SerialChannel {
     }
 
     pub fn run(&mut self) {
-        // we're not gonna need to send gcode at more than 30fps, so we can just make
-        // this thread sleep most of the time rather than futz about with async
-        let thread_delay = time::Duration::from_millis(35);
+        // fudge it so we get maybe 3 commands per second, idk
+        let thread_delay = time::Duration::from_millis(250);
         println!("Starting serial port thread...");
 
         loop {
