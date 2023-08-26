@@ -38,7 +38,7 @@ class PostedJob(BaseModel):
 
 
 class GcodeJob(PostedJob):
-    image_path: str = "https://fakeimg.pl/800x600"
+    image_path: str = "https://fakeimg.pl/200x325"
     progress: t.Optional[int] = None
     status: Status = Status.RECEIVED
     handle: t.Optional[Handle] = None

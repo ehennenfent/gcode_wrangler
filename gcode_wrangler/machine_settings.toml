@@ -1,5 +1,5 @@
-xdim = 400
-ydim = 400
+xdim = 200
+ydim = 325
 flavor = "GRBL"
 name = "Drawbot"
 port = "/dev/ttyACM0"
