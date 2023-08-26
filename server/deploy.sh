@@ -1,0 +1,1 @@
+authbind gunicorn --workers 1 --worker-class uvicorn.workers.UvicornWorker -b 0.0.0.0:80 drawbot_server.main:app
