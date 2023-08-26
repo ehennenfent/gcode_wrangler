@@ -46,34 +46,16 @@ class GcodeJob(PostedJob):
     def run(self) -> None:
         client: GcodeClient = GcodeClient()
 
-        # State machine
         assert self.status == Status.READY
-        self.status = Status.RUNNING
-
         assert self.handle is not None
 
         client.start_run(self.handle)
-
-        # Monitor progress
-        self.progress = 0
-        sleep(1)
-        starting_progress = client.get_progress(self.handle)
-        current_progress = starting_progress
-
-        while current_progress > 0:
-            current_progress = client.get_progress(self.handle)
-            self.progress = int(((starting_progress - current_progress) / starting_progress) * 100)
-            sleep(1)
-
-        # Reset upon completion
-        self.progress = None
-        self.status = Status.READY
 
     @classmethod
     def from_posted(cls, posted: PostedJob) -> "GcodeJob":
         return cls(comment=posted.comment, username=posted.username, movements=posted.movements)
 
-    def analyze(self) -> None:
+    def analyze(self, event_channel = None) -> None:
         client = GcodeClient()
         self.handle = client.upload(self.movements)
 
@@ -82,3 +64,5 @@ class GcodeJob(PostedJob):
 
         self.image_path = f"/rendered/{self.handle}.png"
         self.status = Status.READY
+        if event_channel is not None:
+            event_channel.broadcast("job_ready")

@@ -1,3 +1,4 @@
+from functools import partial
 import typing as t
 from pathlib import Path
 
@@ -86,7 +87,7 @@ async def post_job(new_job: PostedJob, background_tasks: BackgroundTasks):
         primary_job = processed
     else:
         all_jobs.append(processed)
-    background_tasks.add_task(processed.analyze)
+    background_tasks.add_task(partial(processed.analyze, event_manager))
     event_manager.broadcast("new_job")
 
 

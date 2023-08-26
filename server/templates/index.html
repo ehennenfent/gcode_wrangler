@@ -20,7 +20,7 @@
 
     <div id="layout" class="flexh even-spacing">
         <div id="leftpane" class="flexv hcenter">
-            <div hx-get="/primary_job" hx-trigger="load, next_job from:body, sse:new_job, every 15s"></div>
+            <div hx-get="/primary_job" hx-trigger="load, next_job from:body, sse:new_job, sse:job_ready, every 15s"></div>
             <div id="control_panel" class="flexh hcenter">
                 <button hx-post="/cancel" hx-swap="none">Cancel</button>
                 <button hx-post="/run_current" hx-swap="none">Go</button>
@@ -28,7 +28,7 @@
             </div>
         </div>
         <div id="rightpane" class="flexv">
-            <div hx-get="/job_list" hx-trigger="load, next_job from:body, sse:new_job, every 15s" class="flexv"></div>
+            <div hx-get="/job_list" hx-trigger="load, next_job from:body, sse:new_job, sse:job_ready, every 15s" class="flexv"></div>
         </div>
     </div>
 
