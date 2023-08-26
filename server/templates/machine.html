@@ -1,0 +1,14 @@
+<div class="flexv">
+    <div class="flexh" style="justify-content: space-around;">
+        {% if details %}
+        <div>Status: Connected</div>
+        <div>Dimensions: (X: {{details.dimensions.x}}, Y: {{details.dimensions.y }})</div>
+        <div>Flavor: {{details.flavor}} </div>
+        <div>Port: {{details.port}} </div>
+        <div>Baud Rate: {{details.baud_rate}} </div>
+        {% else %}
+        <div>Status: Disconnected</div>
+        {% endif %}
+    </div>
+</div>
+

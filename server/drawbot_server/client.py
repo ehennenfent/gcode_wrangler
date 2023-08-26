@@ -12,10 +12,18 @@ class GcodeClient:
         self.drawbot_host = drawbot_host
 
     def _get_endpoint(self, extension, *args, **kwargs):
-        return requests.get(f"http://{self.drawbot_host}/{extension}", *args, **kwargs)
+        try:
+            return requests.get(f"http://{self.drawbot_host}/{extension}", *args, **kwargs)
+        except ConnectionError as e:
+            print(f"Error calling {self.drawbot_host}: {e}")
+            return None
 
     def _post_endpoint(self, extension, *args, **kwargs):
-        return requests.post(f"http://{self.drawbot_host}/{extension}", *args, **kwargs)
+        try:
+            return requests.post(f"http://{self.drawbot_host}/{extension}", *args, **kwargs)
+        except ConnectionError as e:
+            print(f"Error calling {self.drawbot_host}: {e}")
+            return None
 
     def start_run(self, handle: Handle):
         return self._post_endpoint(f"run/{handle}")
@@ -46,6 +54,4 @@ class GcodeClient:
         return self._post_endpoint("cancel")
 
     def get_machine(self):
-        details = self._get_endpoint("machine").json()
-        print("Got machine details:", details)
-        return details
+            return self._get_endpoint("machine").json()

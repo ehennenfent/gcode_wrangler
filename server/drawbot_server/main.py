@@ -47,6 +47,10 @@ async def job_list(request: Request):
 async def get_progress(request: Request):
     return templates.TemplateResponse("progress.html", {"request": request, "primary_job": primary_job})
 
+@app.get("/machine", response_class=HTMLResponse)
+async def get_machine_details(request: Request):
+    return templates.TemplateResponse("machine.html", {"request": request, "details": GcodeClient().get_machine()})
+
 
 @app.post("/run_current")
 async def run_current_job(response: Response, background_tasks: BackgroundTasks):

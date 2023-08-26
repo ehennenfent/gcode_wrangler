@@ -13,9 +13,20 @@
 <body>
 
 <div class="flexv" hx-ext="sse" sse-connect="/event_stream">
-
-    <div class="header">
-        <div class="pure-menu-heading">Drawbot Controls</div>
+    <div class="flexh header" style="justify-content: space-between;">
+        <div class="flexv">
+            <div class="header flexh" style="align-items:end">
+                <div style="font-size: x-large;">Drawbot Controls</div>
+                <div style="color: #999999; padding-left: 1rem;">server.drawbot.art</div>
+            </div>
+            <div hx-get="/machine" hx-trigger="load, every 10s"></div>
+        </div>
+        <div class="flexv hcenter">
+            <div class = "flexh hcenter"><img src="/static/gcode_wrangler_qr.png" style="width: 120px; height: 120px;"></div>
+            
+            <div style="font-size: x-small;"><a href="https://github.com/ehennenfent/gcode_wrangler">github.com/ehennenfent/gcode_wrangler</a></div>
+        </div>
+        
     </div>
 
     <div id="layout" class="flexh even-spacing">
