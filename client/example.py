@@ -1,7 +1,7 @@
 from drawbot_client import Client
 from drawbot_client.l_system import Seripinski
 
-client = Client("localhost:8002", "SuperSecretSessionKey", "ehennenfent")
+client = Client("server.drawbot.art", "SuperSecretSessionKey", "ehennenfent")
 
 with client.session() as session:
     drawbot = session.drawbot()
