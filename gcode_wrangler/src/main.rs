@@ -1,4 +1,5 @@
-use axum::http::{header, StatusCode};
+use axum::body::{Bytes, Full};
+use axum::http::{header, Response, StatusCode};
 use axum::{extract::Json, extract::Path, extract::State, routing::get, routing::post, Router};
 
 use config::Config;
@@ -15,6 +16,9 @@ use std::sync::{Arc, Mutex};
 use std::thread;
 use tokio::sync::mpsc::Sender;
 use tokio::sync::watch::Receiver;
+use tower_http::trace;
+use tower_http::trace::TraceLayer;
+use tracing::Level;
 
 type Handle = u64;
 
@@ -65,15 +69,24 @@ async fn main() {
 
     thread::spawn(move || channel.run());
 
+    tracing_subscriber::fmt()
+        .init();
+
     let app = Router::new()
-        .route("/run", get(get_run).post(post_run))
-        .route("/rendered", get(get_analysis))
+        .route("/run/:handle", get(get_run).post(post_run))
+        .route("/rendered/:handle", get(get_analysis))
         .route("/movements", post(post_movements))
         .route("/pause", post(post_pause))
         .route("/resume", post(post_resume))
         .route("/machine", get(get_machine))
+        .layer(
+            TraceLayer::new_for_http()
+                .make_span_with(trace::DefaultMakeSpan::new().level(Level::INFO))
+                .on_response(trace::DefaultOnResponse::new().level(Level::INFO)),
+        )
         .with_state(state);
 
+    println!("Starting Server...");
     // run it with hyper on localhost:3000
     axum::Server::bind(&"0.0.0.0:3000".parse().unwrap())
         .serve(app.into_make_service())
@@ -93,19 +106,23 @@ async fn post_movements(
     movements.hash(&mut s);
     let hash = s.finish();
 
+    let clamped_movements = clamp_movements(
+        movements,
+        state.machine_details.dimensions,
+        Position::Absolute,
+    );
+
     state
         .cached_gcode
         .lock()
         .unwrap()
-        .insert(hash, to_gcode(&movements, Position::Relative));
-    state.movements.lock().unwrap().insert(
-        hash,
-        clamp_movements(
-            movements,
-            state.machine_details.dimensions,
-            Position::Relative,
-        ),
-    );
+        .insert(hash, to_gcode(&clamped_movements, Position::Absolute));
+
+    state
+        .movements
+        .lock()
+        .unwrap()
+        .insert(hash, clamped_movements);
 
     hash.to_string()
 }
@@ -143,7 +160,7 @@ async fn get_run(State(state): State<AppState>) -> Json<usize> {
 async fn get_analysis(
     State(state): State<AppState>,
     Path(handle): Path<Handle>,
-) -> impl axum::response::IntoResponse {
+) -> Response<Full<Bytes>> {
     let dimensions = state.machine_details.dimensions;
     match state.movements.lock().unwrap().get(&handle) {
         Some(movements) => {
@@ -157,8 +174,9 @@ async fn get_analysis(
 
             for movement in movements.iter() {
                 let dest = (
-                    start_position.0 + (movement.dest.x * IMAGE_SCALE),
-                    start_position.1 + (movement.dest.y * IMAGE_SCALE),
+                    // using absolute coordinates always for now
+                    (movement.dest.x * IMAGE_SCALE),
+                    (movement.dest.y * IMAGE_SCALE),
                 );
 
                 draw_line_segment_mut(
@@ -181,16 +199,16 @@ async fn get_analysis(
                 .0
                 .write_to(&mut bytes, ImageOutputFormat::Png)
                 .expect("Failed to save canvas bytes");
-            (
-                StatusCode::OK,
-                (header::CONTENT_TYPE, "image/png"),
-                bytes.into_inner(),
-            )
+
+            Response::builder()
+                .status(StatusCode::OK)
+                .header(header::CONTENT_TYPE, "image/png")
+                .body(Full::from(bytes.into_inner()))
+                .unwrap()
         }
-        None => (
-            StatusCode::NOT_FOUND,
-            (header::CONTENT_TYPE, "image/png"),
-            vec![],
-        ),
-    };
+        None => Response::builder()
+            .status(StatusCode::NOT_FOUND)
+            .body(Full::from(vec![]))
+            .unwrap(),
+    }
 }

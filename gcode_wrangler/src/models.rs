@@ -4,7 +4,7 @@ use std::hash::{Hash, Hasher};
 
 use crate::Flavor;
 
-#[derive(Clone, Deserialize, Default, Serialize, Copy)]
+#[derive(Clone, Deserialize, Default, Serialize, Copy, Debug)]
 pub struct Vec2D {
     pub x: f32,
     pub y: f32,
