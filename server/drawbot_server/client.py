@@ -26,9 +26,7 @@ class GcodeClient:
 
     def get_rendered(self, handle: Handle):
         request = self._get_endpoint(f"rendered/{handle}", stream=True)
-        print("Got", len(request.content), "bytes")
-        print(request)
-        return request.raw
+        return request.content
 
     def upload(self, movements: t.List["Movement"]) -> Handle:
         print("Uploading", len(movements), "to server")
@@ -44,7 +42,7 @@ class GcodeClient:
         print("Resuming...")
         return self._post_endpoint(f"resume")
     
-    def resume(self):
+    def cancel(self):
         print("Stopping...")
         return self._post_endpoint(f"stop")
 

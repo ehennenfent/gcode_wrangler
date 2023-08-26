@@ -1,4 +1,3 @@
-import shutil
 import typing as t
 from enum import Enum, auto
 from pathlib import Path
@@ -82,7 +81,7 @@ class GcodeJob(PostedJob):
         self.handle = client.upload(self.movements)
 
         with open(SERVER_DIR.joinpath("rendered").joinpath(f"{self.handle}.png"), "wb") as pngfile:
-            shutil.copyfileobj(client.get_rendered(self.handle), pngfile)
+            pngfile.write(client.get_rendered(self.handle))
 
         self.image_path = f"/rendered/{self.handle}.png"
         self.status = Status.READY

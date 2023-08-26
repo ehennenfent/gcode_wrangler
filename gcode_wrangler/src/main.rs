@@ -7,6 +7,7 @@ use gcode_wrangler::models::{MachineDetails, Movement};
 use gcode_wrangler::{
     clamp_movements, to_gcode, to_program, GCode, PortCmd, Position, SerialChannel,
 };
+use image::imageops::flip_vertical_in_place;
 use image::{ImageOutputFormat, Rgba, RgbaImage};
 use imageproc::drawing::{draw_line_segment_mut, Blend};
 use std::collections::hash_map::{DefaultHasher, HashMap};
@@ -192,6 +193,8 @@ async fn get_analysis(
 
                 start_position = dest;
             }
+
+            flip_vertical_in_place(&mut canvas.0);
 
             let buf: Vec<u8> = Vec::new();
             let mut bytes: Cursor<Vec<u8>> = Cursor::new(buf);
