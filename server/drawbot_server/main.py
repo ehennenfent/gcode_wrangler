@@ -1,4 +1,5 @@
 import typing as t
+from pathlib import Path
 
 from fastapi import BackgroundTasks, FastAPI, Request, Response
 from fastapi.responses import HTMLResponse
@@ -8,6 +9,8 @@ from sse_starlette.sse import EventSourceResponse
 
 from .models import GcodeJob, PostedJob
 from .sse_channels import QueueManager
+
+SERVER_DIR = Path(__file__).parent.parent
 
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
@@ -19,7 +22,8 @@ all_jobs: t.List[GcodeJob] = []
 
 event_manager = QueueManager()
 
-app.mount("/static", StaticFiles(directory="static"), name="static")
+app.mount("/static", StaticFiles(directory=SERVER_DIR.joinpath("static")), name="static")
+app.mount("/rendered", StaticFiles(directory=SERVER_DIR.joinpath("rendered")), name="rendered")
 
 
 @app.get("/", response_class=HTMLResponse)

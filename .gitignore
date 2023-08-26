@@ -25,3 +25,6 @@ gcode_wrangler/python/drawbot_control/*.so
 .mypy_cache/
 .ruff_cache/
 *.pyc
+
+# downloaded files from server
+server/rendered/*.png

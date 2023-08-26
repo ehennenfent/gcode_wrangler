@@ -1,10 +1,13 @@
 import typing as t
 from enum import Enum, auto
+from pathlib import Path
 from time import sleep
 
 from pydantic import BaseModel
 
 from .client import GcodeClient, Handle
+
+SERVER_DIR = Path(__file__).parent.parent
 
 
 class Status(Enum):
@@ -64,5 +67,11 @@ class GcodeJob(PostedJob):
         return cls(comment=posted.comment, username=posted.username, movements=posted.movements)
 
     def analyze(self) -> None:
-        self.handle = GcodeClient().upload(self.movements)
+        client = GcodeClient()
+        self.handle = client.upload(self.movements)
+
+        with open(SERVER_DIR.joinpath("rendered").joinpath(f"{self.handle}.png"), "wb") as pngfile:
+            pngfile.write(client.get_rendered(self.handle))
+
+        self.image_path = f"/rendered/{self.handle}"
         self.status = Status.READY
