@@ -1,8 +1,10 @@
 
 {% if primary_job %}
+<div class="job_title">{{primary_job.comment}}</div>
 <div id="gcode_preview">
     <img class="primary-image" src="{{primary_job.image_path}}">
 </div>
+<div class="hcenter" style="display:flex; color:gray">{{primary_job.username}}</div>
 {% else %}
 <div id="nothing_here">
     There's nothing here yet. Go to <a href="https://github.com/ehennenfent/gcode_wrangler">github.com/ehennenfent/gcode_wrangler</a> to get started. 

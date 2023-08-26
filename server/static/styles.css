@@ -47,9 +47,16 @@ body {
 .primary-image {
     width: 400px;
     height: 650px;
+    border: 1px solid gray;
 }
 
 .preview-image {
     width: 60px;
     height: 98px;
+    border: 1px solid #CCCCCC;
+}
+
+.job_title {
+    font-size: larger;
+    padding-bottom: 1rem;
 }
